@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ThemeLight" parent="android:Theme.Holo.Light">
+        <item name="android:textColorPrimary">@color/abc_input_method_navigation_guard</item>
+        <item name="android:statusBarColor">@color/red</item>
+        <item name="android:colorBackground">@color/bright_foreground_disabled_material_dark</item>
+        <item name="colorAccent">@color/material_blue_500</item>
+        <item name="android:textColorSecondary">@color/background</item>
+    </style>
+</resources>

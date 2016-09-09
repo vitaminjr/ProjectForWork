@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.GainInvoiceEditArticlesActivity">
+
+
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/toolbar_gain_article"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:minHeight="?attr/actionBarSize"
+            android:paddingTop="@dimen/tool_bar_top_padding"
+            android:transitionName="actionBar" />
+
+    <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:hint="@string/number"
+    android:id="@+id/text_number_invoice"
+    android:theme="@style/TextViewStyle"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:hint="@string/barcode"
+        android:id="@+id/edit_text_barcode_invoice"
+        style="@style/editStyle"
+        android:inputType="number"
+        />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/text_name_article"
+            android:hint="@string/name"
+            android:theme="@style/TextViewStyle"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/unit"
+            android:id="@+id/text_unit_article"
+            android:theme="@style/TextViewStyle"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/edit_text_count_article"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:theme="@style/TextViewStyle"
+                android:inputType="number"
+                android:hint="@string/count"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/button_count_minus"
+                    android:layout_width="63dp"
+                    android:layout_height="wrap_content"
+                    android:text="-1"
+                    style="@style/myButton"
+                    />
+
+                <Button
+                    android:id="@+id/button_count_plus"
+                    android:layout_width="63dp"
+                    android:layout_height="wrap_content"
+                    android:text="+1"
+                    style="@style/myButton" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="50dp"
+            android:hint="@string/price"
+            android:id="@+id/text_view_price_article"
+            android:theme="@style/TextViewStyle"
+            android:inputType="number"/>
+
+    </LinearLayout>
+
+</LinearLayout>

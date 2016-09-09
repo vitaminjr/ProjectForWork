@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.GainInvoiceEditArticlesActivity">
+
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/toolbar_gain_edit_article"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:minHeight="?attr/actionBarSize"
+            android:paddingTop="@dimen/tool_bar_top_padding"
+            android:transitionName="actionBar"
+            android:layout_gravity="fill"/>
+
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:id="@+id/button_layout"
+
+        android:layout_gravity="bottom|center"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/button_prev_fragment"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/button_rect_layer_left"
+            android:focusable="false"
+
+            />
+        <Button
+            android:id="@+id/button_next_fragment"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/button_rect_layer_right"
+            android:focusable="false"
+            />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edit_invoice_article_container"
+        android:orientation="vertical"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/activity_edit_articles_invoice_pager">
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_edit_articles_invoice_pager"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/button_layout"
+        android:layout_below="@+id/toolbar_gain_edit_article" />
+
+
+</RelativeLayout>

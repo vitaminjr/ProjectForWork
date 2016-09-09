@@ -1,0 +1,11 @@
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/button_rect">
+    </item>
+
+    <item >
+        <bitmap android:src="@drawable/ic_keyboard_arrow_left_black_36dp"></bitmap>
+    </item>
+
+</layer-list>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.GainInvoiceEditArticlesActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="@string/numberName"
+            android:textSize="20dp"
+            android:focusable="false"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/text_number_invoice"
+            android:textSize="20dp"/>
+
+    </LinearLayout>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:hint="@string/barcode"
+        android:id="@+id/edit_text_barcode_invoice"
+        android:inputType="number"
+        android:textSize="20dp"
+        android:layout_height="49dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/rect"
+        android:gravity="center"
+        />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:minHeight="49dp"
+        android:background="@drawable/rect"
+        android:focusable="false">
+
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:id="@+id/text_name_article"
+            android:focusable="false"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_unit_article"
+            android:padding="5dp"
+            android:focusable="false"
+            />
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:minHeight="49dp"
+        android:background="@drawable/rect"
+        android:id="@+id/layout_planned_count"
+        android:focusable="false">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Планова кількість:"
+            android:focusable="false"
+            android:layout_gravity="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:focusable="false"
+            android:id="@+id/planned_count"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity = "center"
+        android:layout_margin="5dp">
+
+        <Button
+            android:id="@+id/button_count_minus"
+            android:layout_width="wrap_content"
+            android:layout_height="49dp"
+            android:text="-"
+            style="@style/ButtonIncDecLeft"
+            android:focusable="false"
+
+            />
+
+        <EditText
+            android:id="@+id/edit_text_count_article"
+            android:layout_width="wrap_content"
+            android:layout_weight="3"
+            android:layout_gravity="center"
+            android:inputType="numberDecimal"
+            android:textSize="20dp"
+            android:hint="@string/count"
+            android:layout_height="49dp"
+            style="@style/countStyle"
+            android:singleLine="true"
+            android:minWidth="100dp"
+            android:gravity="center"/>
+
+        <Button
+
+            android:id="@+id/button_count_plus"
+            android:layout_width="wrap_content"
+            android:layout_height="49dp"
+            android:text="+"
+            style="@style/ButtonIncDecRight"
+            android:focusable="false"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:textSize="20dp"
+                android:layout_height="wrap_content"
+                android:text="@string/price"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+
+                android:id="@+id/text_view_price_article"
+                android:layout_marginLeft="10dp"
+                android:inputType="numberDecimal"
+                android:textSize="20dp"
+                android:layout_height="49dp"
+                android:gravity="center"
+                style="@style/editStyle2"
+                android:minWidth="100dp"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="38dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Сума"
+                android:layout_gravity="center"
+                android:textSize="20dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/text_view_suma_article"
+                android:textSize="20dp"
+                android:enabled="false"
+                android:layout_height="49dp"
+                android:gravity="center"
+                android:minWidth="100dp"
+                style="@style/editStyle2"
+                android:focusable="false"
+                />
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

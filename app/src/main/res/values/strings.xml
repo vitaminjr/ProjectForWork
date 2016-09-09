@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">MobileAccounting</string>
+
+
+  <string name="action_next">Наступний</string>
+  <string name="action_finish">Кінець</string>
+  <string name="coming">Прихід/Видатки</string>
+  <string name="check_prices">Перевірка цін</string>
+  <string name="inventory">Інвертирезація</string>
+
+  <string name="expense">Видаткова накладна</string>
+  <string name="clean">Очистка</string>
+  <string name="input">Введення</string>
+  <string name="gain">Прибуткова накладна</string>
+  <string name="create">Створити</string>
+  <string name="edit">Редагувати</string>
+  <string name="export">Експорт</string>
+  <string name="revision">Перегляд</string>
+  <string name="revision_list">Перегляд списку</string>
+
+  <string name="provider">Постачальник: </string>
+  <string name="choice">Обрати</string>
+  <string name="date">Дата</string>
+  <string name="name">Назва </string>
+  <string name="code">Код ЄДРПОУ:</string>
+  <string name="number">№   </string>
+  <string name="numberName">Накладна № </string>
+  <string name="from">від:</string>
+  <string name="action_done">Зберегти</string>
+  <string name="price">Ціна</string>
+  <string name="barcode">Штрихкод</string>
+  <string name="unit">Од.Вим</string>
+  <string name="count">Кількість</string>
+  <string name="find">Знайти товар</string>
+  <string name="action_previous">Попередній</string>
+
+
+
+
+</resources>

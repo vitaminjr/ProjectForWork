@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_gravity="center"
+        android:id="@+id/text_invoice"
+        android:textSize="22dp"/>
+
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp">
+
+        <TextView
+            android:textColor="#0d0ac6"
+            android:text="№: "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:id="@+id/text_edit_number"
+            android:layout_height="49dp"
+            android:layout_margin="10dp"
+            android:hint="                       "
+            style="@style/editStyle2"
+            android:gravity="center"
+            />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:textColor="#0d0ac6"
+            android:layout_marginTop="1dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/from"
+
+
+            />
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="9dp"
+            android:textSize="18dp"
+            android:text="@string/date"
+            android:id="@+id/button_edit_date"
+            android:hint="       Дата       "
+            android:background="@drawable/button_rect"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:paddingTop="5dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        >
+
+        <TextView
+            android:text="@string/provider"
+            android:id="@+id/text_type_provider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#0d0ac6"
+            android:paddingLeft="20dp"
+            android:layout_margin="10dp"
+            android:hint=""/>
+
+        <Button
+            android:text="@string/choice"
+            android:hint="@string/choice"
+            android:textSize="18dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:id="@+id/button_choice_provider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_rect" />
+
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingRight="5dp"
+
+            android:layout_marginRight = "10dp"
+            android:layout_marginLeft = "10dp"
+            android:layout_marginBottom = "10dp"
+            >
+
+
+
+            <TextView
+                android:text="@string/code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="11dp"
+                android:textColor="#0d0ac6"
+                />
+            <TextView
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:id="@+id/text_view_code_edrpou"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>
