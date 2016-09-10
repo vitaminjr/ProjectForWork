@@ -799,4 +799,67 @@ public class SqlQuery {
         return listTamplate;
     }
 
+    public static Cursor getPriceCheckItems(Context context){
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+
+        String sqlQuery = " SELECT ab.barcode, a.code, a.name, a.unit_name, a.price, a.article_id AS _id" +
+        " FROM price_check pc " +
+        "     LEFT JOIN articles a ON (a.article_id = pc.article_id) " +
+        "     LEFT JOIN article_barcodes ab ON (ab.article_id = a.article_id) " +
+        " GROUP BY pc.article_id ";
+
+        Cursor cursor =  sqLiteDatabase.rawQuery(sqlQuery,null);
+
+        return cursor;
+    }
+
+    public static void clearCheckPrices(Context context){
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        String sqlQuery = " DELETE FROM price_check";
+        sqLiteDatabase.execSQL(sqlQuery);
+        Toast.makeText(context,"Очищено!!!",Toast.LENGTH_SHORT).show();
+
+    }
+
+    public static void exportPriceCheck(Context context){
+
+        context.deleteDatabase("/sdcard/mobileAcounting/price_check_result.odf");
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+
+        DBHelperResultPriceCheck DBHelperResultPriceCheck = new DBHelperResultPriceCheck(context);
+        SQLiteDatabase sqLiteDatabaseResult = DBHelperResultPriceCheck.getWritableDatabase();
+
+        Cursor cursor =  sqLiteDatabase.rawQuery("SELECT * FROM price_check;",null);
+
+        if(cursor.moveToFirst()) {
+
+            int barcodeColIndex = cursor.getColumnIndex("barcode");
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
+
+            do {
+
+                sqLiteDatabaseResult.execSQL("INSERT INTO price_check (barcode, article_id) " +
+                        "VALUES ( "+ cursor.getString(barcodeColIndex) + ","
+                        + cursor.getString(articleIdColIndex) + ");");
+
+            }while (cursor.moveToNext());
+        }
+    }
+
+    public static void insertPriceCheck(Context context, InvoiceRow article){
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("article_id",article.getArticleId());
+        contentValues.put("barcode",article.getBarcode());
+
+        sqLiteDatabase.insert("price_check","",contentValues);
+    }
+
 }

@@ -56,7 +56,6 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
     Button buttonPrevView;
     int invoiceTypeId;
     private int created;
-    String nameMenu;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
