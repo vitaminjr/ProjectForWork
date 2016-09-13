@@ -2,7 +2,7 @@ package com.example.vitaminjr.mobileacounting.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -10,42 +10,61 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import com.example.vitaminjr.mobileacounting.R;
-import com.example.vitaminjr.mobileacounting.fragments.CheckPricesFragment;
-import com.example.vitaminjr.mobileacounting.fragments.InventoryFragment;
+import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceEditFragment;
+import com.example.vitaminjr.mobileacounting.fragments.InventoryEditFragment;
+import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 /**
- * Created by vitaminjr on 06.07.16.
+ * Created by vitaminjr on 12.09.16.
  */
-public class InventoryActivity extends AppCompatActivity {
+public class InventoryEditActivity extends AppCompatActivity {
 
-    private final int CREATE = 1;
-    private final int EXPORT = 2;
+    private final int EDIT = 1;
+    private final int REVISION = 2;
+
+
+    long inventoryId;
+    FragmentTransaction fragmentTransaction;
+    InventoryEditFragment inventoryEditFragment;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_inventory);
+        setContentView(R.layout.activity_edit_inventory);
         initGui();
-        initFragment();
     }
+
+
+
 
     public void initGui(){
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_inventory);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_inventory_edit);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        initDrawer(toolbar);
-    }
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
-    public void initFragment(){
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        InventoryFragment inventoryFragment = InventoryFragment.newInstance();
-        fragmentTransaction.add(R.id.fragment_container, inventoryFragment);
+        initDrawer(toolbar);
+
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+
+        if(inventoryId == 0) {
+            inventoryEditFragment = InventoryEditFragment.newInstance();
+        }else {
+            inventoryEditFragment = InventoryEditFragment.newInstance(inventoryId);
+        }
+
+        fragmentTransaction.replace(R.id.add_inventory_container, inventoryEditFragment);
         fragmentTransaction.commit();
     }
+
+
 
     public void initDrawer(Toolbar toolbar){
         new Drawer()
@@ -53,35 +72,27 @@ public class InventoryActivity extends AppCompatActivity {
                 .withToolbar(toolbar)
                 .withActionBarDrawerToggle(true)
                 .withHeaderDivider(true)
-            //    .withHeader(R.layout.drawer_header)
+                //    .withHeader(R.layout.drawer_header)
                 .addDrawerItems(
                         new SectionDrawerItem().withName(R.string.inventory),
-                        new PrimaryDrawerItem().withName(R.string.create).withIdentifier(CREATE),
-                        new PrimaryDrawerItem().withName(R.string.export).withIdentifier(EXPORT)
+                        new PrimaryDrawerItem().withName(R.string.edit).withIdentifier(EDIT),
+                        new PrimaryDrawerItem().withName(R.string.revision).withIdentifier(REVISION)
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
                         switch (drawerItem.getIdentifier()) {
-                            case CREATE :
-                                Intent intent = new Intent(getApplicationContext(), InventoryEditActivity.class);
-                                startActivity(intent);
+                            case EDIT :
+
                                 break;
-                            case EXPORT :
+                            case REVISION :
 
                                 break;
                         }
                     }
                 }).build();
     }
-    @Override
-    public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-            return;
-        }
-        super.onBackPressed();
 
-    }
+
 
 }

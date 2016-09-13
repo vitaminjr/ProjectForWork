@@ -77,7 +77,7 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
                         if (drawerItem != null) {
                             switch (drawerItem.getIdentifier()) {
                                 case CREATE_GAIN:
-                                    initEditFragment();
+                                    initEditActivity();
                                     break;
                                 case EXPORT:
                                     SqlQuery.getInvoices(getApplicationContext());
@@ -101,7 +101,7 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
 
     }
 
-    public void initEditFragment() {
+    public void initEditActivity() {
 
         Intent intent = new Intent(getApplicationContext(), GainInvoiceEditActivity.class);
         intent.putExtra("type", InvoiceType.profit.ordinal());

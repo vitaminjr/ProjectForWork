@@ -141,7 +141,7 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
         textTypeProvider = (TextView) view.findViewById(R.id.text_type_provider);
         numberText.clearFocus();
         codeEDRPOUText = (TextView) view.findViewById(R.id.text_view_code_edrpou);
-        buttonChoiceProvider = (Button) view.findViewById(R.id.button_choice_provider);
+        buttonChoiceProvider = (Button) view.findViewById(R.id.button_choice_stores);
 
 
         initListeners();

@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.models.Article;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
+import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.Provider;
@@ -775,7 +776,7 @@ public class SqlQuery {
         Toast.makeText(context,"Успішно", Toast.LENGTH_SHORT).show();
     }
 
-    public static List<BarcodeTamplateInfo> getBarcodeTamplates(Context context){
+    public static List<BarcodeTamplateInfo> getBarcodeTemplates(Context context){
 
         DBHelper dbHelper = new DBHelper(context);
         SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
@@ -860,6 +861,88 @@ public class SqlQuery {
         contentValues.put("barcode",article.getBarcode());
 
         sqLiteDatabase.insert("price_check","",contentValues);
+    }
+
+    public static Cursor getStores(Context context){
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        String sqlQuery = "SELECT store_id AS _id, name FROM stores ORDER BY name";
+        Cursor cursor =  sqLiteDatabase.rawQuery(sqlQuery, null);
+        return cursor;
+    }
+
+    public static Cursor getStoresById(Context context, long id){
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT store_id AS _id, name" +
+                "FROM stores" +
+                " WHERE store_id = " + String.valueOf(id) + ";", null);
+
+        return cursor;
+    }
+
+    public static Cursor searchStores(Context context, String filter){
+
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT store_id AS _id, name" +
+                "FROM stores " +
+                "WHERE name LIKE \"%" + filter + "%\" ", null);
+        return cursor;
+    }
+
+    public static Cursor getInventoriesCursor(Context context) {
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
+                "   inv.number, " +
+                "   inv.store_id, " +
+                "   s.name as store_name, " +
+                "   inv.date_d, " +
+                "   inv.created" +
+                " FROM inventories inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
+    public static InventoryInvoice getInventoriesInvoice(Cursor cursor){
+        InventoryInvoice inventoryInvoice = new InventoryInvoice();
+        if(cursor.moveToFirst()) {
+            int idColIndex = cursor.getColumnIndex("_id");
+            int numberColIndex = cursor.getColumnIndex("number");
+            int storeIdColIndex = cursor.getColumnIndex("store_id");
+            int nameColIndex = cursor.getColumnIndex("store_name");
+            int dateColIndex = cursor.getColumnIndex("date_d");
+            int createdColIndex = cursor.getColumnIndex("created");
+
+            inventoryInvoice.setInventoryId(Integer.parseInt(cursor.getString(idColIndex)));
+            inventoryInvoice.setNumber(cursor.getString(numberColIndex));
+            inventoryInvoice.setDate(cursor.getString(dateColIndex));
+            inventoryInvoice.setStoreId(cursor.getInt(storeIdColIndex));
+            inventoryInvoice.setInventoryCode(cursor.getInt(idColIndex));
+            inventoryInvoice.setCreated(cursor.getInt(createdColIndex));
+            inventoryInvoice.setNameStore(cursor.getString(nameColIndex));
+
+        }
+        return inventoryInvoice;
+    }
+    public static Cursor getInventoriesByIdCursor(Context context, long id) {
+        DBHelper dbHelper = new DBHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
+                "   inv.number, " +
+                "   inv.store_id, " +
+                "   s.name as store_name, " +
+                "   inv.date_d, " +
+                "   inv.created" +
+                " FROM inventories inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
+                "WHERE inv.store_id = " + id +
+                " ORDER BY inv.number ", null);
+        return c;
     }
 
 }

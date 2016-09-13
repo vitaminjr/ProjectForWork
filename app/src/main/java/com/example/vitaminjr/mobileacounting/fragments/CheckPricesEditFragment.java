@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
-import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
@@ -93,7 +92,7 @@ public class CheckPricesEditFragment extends Fragment {
 
                         String barcode = String.valueOf(editTextBarcode.getText());
 
-                        listTemplate = SqlQuery.getBarcodeTamplates(getContext());
+                        listTemplate = SqlQuery.getBarcodeTemplates(getContext());
 
                         ResultTemplate resultTmp = SqlQuery.getArticleByBarcode(barcode.trim(),
                                 getContext(),listTemplate);

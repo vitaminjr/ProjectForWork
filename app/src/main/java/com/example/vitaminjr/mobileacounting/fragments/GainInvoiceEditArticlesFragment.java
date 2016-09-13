@@ -1,6 +1,5 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -25,9 +24,6 @@ import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
-import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
-import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListenerArticles;
-import com.example.vitaminjr.mobileacounting.models.Article;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
@@ -117,7 +113,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         View view =  inflater.inflate(R.layout.fragment_edit_articles_invoice,container,false);
         initGui(view);
 
-        listTemplate = SqlQuery.getBarcodeTamplates(getContext());
+        listTemplate = SqlQuery.getBarcodeTemplates(getContext());
 
         if(correctionType == CorrectionType.ctUpdate.ordinal() ||
                 correctionType == CorrectionType.ctCollate.ordinal())
