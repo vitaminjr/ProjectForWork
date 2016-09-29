@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -21,7 +21,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="10dp"
         android:id="@+id/add_inventory_container"
         android:orientation="vertical"
         android:layout_alignParentLeft="true"
@@ -31,4 +32,44 @@
         android:layout_alignParentEnd="true">
     </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:id="@+id/button_layout"
+
+        android:layout_gravity="bottom|center"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/button_prev_fragment"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/button_rect_layer_left"
+
+            />
+        <Button
+            android:id="@+id/button_next_fragment"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/button_rect_layer_right"
+            />
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragment_edit_inventory_pager"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/button_layout"
+        android:layout_below="@+id/add_inventory_container" />
+
+</RelativeLayout>

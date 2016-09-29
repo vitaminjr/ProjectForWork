@@ -3,6 +3,10 @@
     package="com.example.vitaminjr.mobileacounting">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SOCIAL_STREAM" />
 
     <application
         android:allowBackup="true"
@@ -62,6 +66,28 @@
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.InventoryEditActivity"
             android:label= "Інвертирезація"
             >
+
+        </activity>
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.ListStoresActivity"
+            android:label= "Підрозділ"
+            >
+
+        </activity>
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.InventoryEditArticlesActivity"
+            android:label= "Редагування товарів">
+
+        </activity>
+
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.ListArticlesInventoryActivity"
+            android:label= "Список товарів">
+
+        </activity>
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.SettingsActivity"
+            android:label= "Налаштування">
 
         </activity>
 

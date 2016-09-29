@@ -90,7 +90,7 @@ public class GainInvoiceFragment extends Fragment {
             }
         });
         listView = (ListView) getActivity().findViewById(R.id.listView);
-        cursor = SqlQuery.getInvoices(getContext(), invoiceTypeId);
+        cursor = SqlQuery.exportInvoices(getContext(), invoiceTypeId);
         adapter = new ListViewAdapter(getContext(), cursor,true);
         onSomaEventListener.someEvent(adapter);
         listView.setAdapter(adapter);
@@ -150,7 +150,7 @@ public class GainInvoiceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        adapter = new ListViewAdapter(getContext(),SqlQuery.getInvoices(getContext(), invoiceTypeId),true);
+        adapter = new ListViewAdapter(getContext(),SqlQuery.exportInvoices(getContext(), invoiceTypeId),true);
         listView.setAdapter(adapter);
     }
 

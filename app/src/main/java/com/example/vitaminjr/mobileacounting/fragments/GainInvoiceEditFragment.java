@@ -52,7 +52,7 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
     private static final int REQUEST_PROVIDER = 1;
     public static final int REQUEST_DATE_INVOICE= 2;
     private Fragment linkFragment;
-    private final int DEFAULTIDPROVIDER = 0;
+    private final int DEFAULT_ID_PROVIDER = 0;
 
     public boolean markSave = false;
 
@@ -304,7 +304,7 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
     public void onBackPressed() {
         if(invoiceId == 0) {
             if ((!invoice.getNumberInvoice().equals("")
-                    || invoice.getProviderId() != DEFAULTIDPROVIDER
+                    || invoice.getProviderId() != DEFAULT_ID_PROVIDER
                     || !invoice.getDateCreateInvoice().equals("")) && markSave == false)
                     onCreateDialog();
             else

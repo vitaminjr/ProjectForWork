@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:hint="@string/barcode"
         android:id="@+id/edit_text_barcode_price_check"
-        android:inputType="number"
+        android:inputType="text"
         android:textSize="20dp"
         android:layout_height="49dp"
         android:layout_margin="5dp"

@@ -2,8 +2,6 @@ package com.example.vitaminjr.mobileacounting.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,7 +13,6 @@ import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.fragments.CheckPricesEditFragment;
 import com.example.vitaminjr.mobileacounting.fragments.CheckPricesFragment;
-import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
@@ -33,6 +30,7 @@ public class CheckPricesActivity extends AppCompatActivity {
     FragmentTransaction fragmentTransaction;
     CheckPricesEditFragment checkPricesEditFragment;
     CheckPricesFragment checkPricesFragment;
+
 
 
     @Override
@@ -58,7 +56,6 @@ public class CheckPricesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         initDrawer(toolbar);
-
 
 
     }
@@ -124,5 +121,6 @@ public class CheckPricesActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStack();
         }
     }
+
 
 }

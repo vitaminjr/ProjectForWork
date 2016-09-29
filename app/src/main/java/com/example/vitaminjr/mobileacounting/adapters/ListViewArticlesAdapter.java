@@ -49,7 +49,6 @@ public class ListViewArticlesAdapter extends CursorAdapter {
             viewHolder = (InvoiceViewHolder) view.getTag();
 
         int invoiceRowId = cursor.getColumnIndex("_id");
-        Log.d("_id",cursor.getString(invoiceRowId));
 
         viewHolder.nameTextView.setText(cursor.getString(cursor.getColumnIndex("article_name")));
         viewHolder.codeTextView.setText(cursor.getString(cursor.getColumnIndex("barcode")));

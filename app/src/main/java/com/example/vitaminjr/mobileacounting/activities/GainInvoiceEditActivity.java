@@ -1,7 +1,6 @@
 package com.example.vitaminjr.mobileacounting.activities;
 
 import android.content.Intent;
-import android.content.pm.InstrumentationInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,7 +19,6 @@ import com.example.vitaminjr.mobileacounting.adapters.InvoicesPagerAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceEditFragment;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
-import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
@@ -86,7 +84,7 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
             fragmentTransaction.commit();
 
         }else {
-            invoiceList = SqlQuery.getListInvoices(SqlQuery.getInvoices(this, invoiceTypeId));
+            invoiceList = SqlQuery.getListInvoices(SqlQuery.exportInvoices(this, invoiceTypeId));
 
             int position = intent.getIntExtra("position",0);
             initViewPager(position, invoiceList);
@@ -167,10 +165,10 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
                                     break;
 
                                 case EXPORT:
-                                    SqlQuery.getInvoices(getApplicationContext());
-                                    SqlQuery.getInvoicesRows(getApplicationContext());
-                                    SqlQuery.getInvoicesRowTovars(getApplicationContext());
-                                    SqlQuery.getInvoiceProviders(getApplicationContext());
+                                    SqlQuery.exportInvoices(getApplicationContext());
+                                    SqlQuery.exportInvoicesRows(getApplicationContext());
+                                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
+                                    SqlQuery.exportInvoiceProviders(getApplicationContext());
                                     break;
                             }
                         }

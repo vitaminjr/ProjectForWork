@@ -5,12 +5,14 @@ package com.example.vitaminjr.mobileacounting.models;
  */
 public class InventoryInvoice {
 
-    long inventoryId;
-    long inventoryCode;
-    String number;
-    long storeId;
-    String date;
-    int created;
+    private long inventoryId;
+    private String inventoryCode;
+    private String number;
+    private long storeId;
+    private String date;
+    private int created;
+    private String nameStore;
+
 
     public String getNameStore() {
         return nameStore;
@@ -20,16 +22,17 @@ public class InventoryInvoice {
         this.nameStore = nameStore;
     }
 
-    String nameStore;
+
 
 
     public InventoryInvoice(){
         inventoryId = 0;
-        inventoryCode = 0;
+        inventoryCode = "";
         number = "";
         storeId = 0;
         date = "";
         created = 1;
+        nameStore = "";
     }
 
 
@@ -41,11 +44,11 @@ public class InventoryInvoice {
         this.inventoryId = inventoryId;
     }
 
-    public long getInventoryCode() {
+    public String getInventoryCode() {
         return inventoryCode;
     }
 
-    public void setInventoryCode(long inventoryCode) {
+    public void setInventoryCode(String inventoryCode) {
         this.inventoryCode = inventoryCode;
     }
 

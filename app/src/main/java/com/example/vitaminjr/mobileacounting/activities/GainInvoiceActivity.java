@@ -7,10 +7,13 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,10 +83,10 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
                                     initEditActivity();
                                     break;
                                 case EXPORT:
-                                    SqlQuery.getInvoices(getApplicationContext());
-                                    SqlQuery.getInvoicesRows(getApplicationContext());
-                                    SqlQuery.getInvoicesRowTovars(getApplicationContext());
-                                    SqlQuery.getInvoiceProviders(getApplicationContext());
+                                    SqlQuery.exportInvoices(getApplicationContext());
+                                    SqlQuery.exportInvoicesRows(getApplicationContext());
+                                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
+                                    SqlQuery.exportInvoiceProviders(getApplicationContext());
                                     break;
                             }
                         }
@@ -113,44 +116,12 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
+
         searchView = (SearchView) searchItem.getActionView();
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        if (null != searchManager) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        }
-        searchView.setIconifiedByDefault(false);
 
 
-        gainInvoiceFragment.adapter.setFilterQueryProvider(new FilterQueryProvider() {
-            @Override
-            public Cursor runQuery(CharSequence constraint) {
-                return getCursor(constraint.toString());
-            }
-        });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                gainInvoiceFragment.adapter.getFilter().filter(query);
-                gainInvoiceFragment.adapter.notifyDataSetChanged();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                gainInvoiceFragment.adapter.getFilter().filter(newText);
-                gainInvoiceFragment.adapter.notifyDataSetChanged();
-                return true;
-            }
-        });
-
-        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus)
-                    listViewAdapter.setCursor(SqlQuery.getInvoices(getApplicationContext(),InvoiceType.profit.ordinal()));
-            }
-        });
+        setSearchView();
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -163,7 +134,7 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
         if (str == null  ||  str.length () == 0)  {
-            mCursor = SqlQuery.getInvoices(getApplicationContext(),InvoiceType.profit.ordinal());
+            mCursor = SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.profit.ordinal());
         }
         else {
             mCursor = SqlQuery.searchInvoice(this, str);
@@ -173,6 +144,62 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
             }
         }
         return mCursor;
+    }
+
+    public void setSearchView(){
+
+        final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        if (null != searchManager) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        }
+        searchView.setIconifiedByDefault(false);
+
+
+        gainInvoiceFragment.adapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence constraint) {
+                return getCursor(constraint.toString());
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                gainInvoiceFragment.adapter.getFilter().filter(checkFilter(query,searchView));
+                gainInvoiceFragment.adapter.notifyDataSetChanged();
+                return true;
+            }
+
+            public String checkFilter(String filter, SearchView search){
+                String s = filter;
+                if(s.length() != 0)
+                    if(s.charAt(0)=='*') {
+                        if(s.length()== 1)
+                            s = String.valueOf("");
+                        else
+                            s = String.valueOf(s.subSequence(1, s.length() - 1));
+                        search.setQuery(s, false);
+                    }
+                return s;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                    gainInvoiceFragment.adapter.getFilter().filter(checkFilter(newText,searchView));
+                gainInvoiceFragment.adapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                    listViewAdapter.setCursor(SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.profit.ordinal()));
+            }
+        });
     }
 
 }

@@ -28,7 +28,9 @@ import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -145,7 +147,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
             buttonCountPlusAction(false,false,false);
             buttonCountMinusAction(false,false,false);
             editTextPriceArticleAction(false,false,false);
-            editTextBarcodeInvoiceActiom(true,true,true);
+            editTextBarcodeInvoiceAction(true,true,true);
         }
 
         if(created == CreateType.pc.ordinal())
@@ -155,14 +157,14 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
         if(created == CreateType.pc.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
         {
-            editTextBarcodeInvoiceActiom(false,false,false);
+            editTextBarcodeInvoiceAction(false,false,false);
             editTextCountArticleAction(true,true,true);
             editTextCountArticle.requestFocus();
         }
 
         if(created == CreateType.device.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
         {
-            editTextBarcodeInvoiceActiom(false,false,false);
+            editTextBarcodeInvoiceAction(false,false,false);
             editTextPriceArticleAction(false,false,false);
             editTextCountArticleAction(true,true,true);
             editTextCountArticle.requestFocus();
@@ -181,7 +183,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
                     if(!String.valueOf(editTextBarcodeInvoice.getText()).equals("")) {
 
-                        String barcode = String.valueOf(editTextBarcodeInvoice.getText());
+                        String tempBarcode = String.valueOf(editTextBarcodeInvoice.getText());
+
+                        String barcode = tempBarcode.replace('*','\n');
 
 
                         ResultTemplate resultTmp = SqlQuery.getArticleByBarcode(barcode.trim(),
@@ -229,7 +233,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                                     if (invoiceRow.getInvoiceRowId() != 0) {
 
                                         correctionType = CorrectionType.ctUpdate.ordinal();
-                                        editTextBarcodeInvoiceActiom(false,false,false);
+                                        editTextBarcodeInvoiceAction(false,false,false);
                                         editTextPriceArticleAction(false,false,false);
                                         buttonCountPlusAction(true,false,false);
                                         buttonCountMinusAction(true,false,false);
@@ -239,7 +243,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                                     }
                                     else {
                                         invoiceRow = article;
-                                        editTextBarcodeInvoiceActiom(false,false,false);
+                                        editTextBarcodeInvoiceAction(false,false,false);
                                         editTextPriceArticleAction(false,false,false);
                                         editTextCountArticleAction(true,true,true);
                                         buttonCountPlusAction(true,false,false);
@@ -255,7 +259,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                                         correctionType = CorrectionType.ctUpdate.ordinal();
                                         showArticles(invoiceRow, correctionType);
                                         textViewPlannedCount.setText(String.valueOf(invoiceRow.getQuantity()));
-                                        editTextBarcodeInvoiceActiom(false,false,false);
+                                        editTextBarcodeInvoiceAction(false,false,false);
                                         editTextCountArticleAction(true,true,true);
                                         buttonCountPlusAction(true,false,false);
                                         buttonCountMinusAction(true,false,false);
@@ -374,7 +378,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                             && (correctionType == CorrectionType.ctInsert.ordinal())
                             || (correctionType == CorrectionType.ctUpdate.ordinal())){
                         editTextPriceArticleAction(false,false,false);
-                        editTextBarcodeInvoiceActiom(true,true,true);
+                        editTextBarcodeInvoiceAction(true,true,true);
                         editTextBarcodeInvoice.requestFocus();
                     }
                     if(correctionType == CorrectionType.ctCollate.ordinal())
@@ -474,7 +478,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         }
         else
         {
-            invoiceRow.setDateTimeChange(String.valueOf(Calendar.DATE));
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
+            String strDate = simpleDateFormat.format(new Date());
+            invoiceRow.setDateTimeChange(strDate);
             SqlQuery.updateInvoiceRow(invoiceRow, getContext());
             Toast.makeText(getContext(),"Оновлено",Toast.LENGTH_SHORT).show();
 
@@ -507,7 +513,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         return super.onOptionsItemSelected(item);
     }
 
-    public void editTextBarcodeInvoiceActiom(boolean enabled, boolean focusable, boolean focusableInTouch){
+    public void editTextBarcodeInvoiceAction(boolean enabled, boolean focusable, boolean focusableInTouch){
         editTextBarcodeInvoice.setEnabled(enabled);
         editTextBarcodeInvoice.setFocusable(focusable);
         editTextBarcodeInvoice.setFocusableInTouchMode(focusableInTouch);
@@ -561,7 +567,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                 if(countPc == true){
                     clearTextView();
                     editTextCountArticleAction(false,false,false);
-                    editTextBarcodeInvoiceActiom(true,true,true);
+                    editTextBarcodeInvoiceAction(true,true,true);
                     editTextBarcodeInvoice.requestFocus();
                     countPc = false;
                 }
@@ -617,18 +623,18 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         if(invoiceRow.getInvoiceRowId() != 0 || invoiceRow.getArticleId() != 0){
 
             try{
-            invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
-            invoiceRow.setPriceAccount(Float.parseFloat(editTextPriceArticle.getText().toString()));
+                invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+                invoiceRow.setPriceAccount(Float.parseFloat(editTextPriceArticle.getText().toString()));
 
-            float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
-            invoiceRow.setSumaAccount(suma);
-            invoiceRow.setCorrectionTypeId(correctionType);
-            textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
+                float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
+                invoiceRow.setSumaAccount(suma);
+                invoiceRow.setCorrectionTypeId(correctionType);
+                textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
 
-            if(created == CreateType.device.ordinal())
-                addOrUpdateInvoiceRows(correctionType);
-            else
-                updateInvoiceRowWithCondition();
+                if(created == CreateType.device.ordinal())
+                    addOrUpdateInvoiceRows(correctionType);
+                else
+                    updateInvoiceRowWithCondition();
             }
             catch (Exception ex){}
         }

@@ -10,27 +10,28 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FilterQueryProvider;
 
 import com.example.vitaminjr.mobileacounting.R;
-import com.example.vitaminjr.mobileacounting.adapters.ListViewAdapter;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewArticlesAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.fragments.ListArticlesInventoryFragment;
 import com.example.vitaminjr.mobileacounting.fragments.ListArticlesInvoiceFragment;
-import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
 import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListenerArticles;
 
 /**
  * Created by vitaminjr on 09.08.16.
  */
-public class ListArticlesInvoiceActivity extends AppCompatActivity implements OnSomeEventListenerArticles {
+public class ListArticlesInventoryActivity extends AppCompatActivity implements OnSomeEventListenerArticles {
 
     SearchView searchView;
     ListViewArticlesAdapter listViewArticlesAdapter;
-    int idInvoice;
+    long idInventory;
     MenuItem searchItem;
 
     @Override
@@ -41,15 +42,14 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
 
 
         Intent getArticleInvoiceIntent = getIntent();
-        int corrType =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.TYPE,0);
-        idInvoice =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.IDINVOICE,0);
-        int created = getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.CREATED,-1);
-        String numberInvoice = getArticleInvoiceIntent.getStringExtra(GainInvoiceEditActivity.NUMBER);
+        idInventory =  getArticleInvoiceIntent.getLongExtra(InventoryEditActivity.ID_INVENTORY,0);
+        int created = getArticleInvoiceIntent.getIntExtra(InventoryEditActivity.CREATED,-1);
+        String numberInvoice = getArticleInvoiceIntent.getStringExtra(InventoryEditActivity.NUMBER);
 
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment.newInstance(numberInvoice,idInvoice,corrType,created);
-        fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInvoiceFragment);
+        ListArticlesInventoryFragment listArticlesInventoryFragment = ListArticlesInventoryFragment.newInstance(numberInvoice,idInventory,created);
+        fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInventoryFragment);
         fragmentTransaction.commit();
 
     }
@@ -81,21 +81,24 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search, menu);
         searchItem = menu.findItem(R.id.action_search);
+
+
         searchView = (SearchView) searchItem.getActionView();
 
         setSearchView();
+
         return super.onCreateOptionsMenu(menu);
     }
 
 
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
-        str = str.replace("*","");
+        str = str.replace("*", "");
         if (str == null  ||  str.length () == 0)  {
-           mCursor = SqlQuery.getListArticle(this,idInvoice);
+           mCursor = SqlQuery.getListInventoryAction(getApplicationContext(), idInventory);
         }
         else {
-            mCursor = SqlQuery.searchArticle(this,idInvoice, str);
+            mCursor = SqlQuery.searchArticleInventory(this,idInventory, str);
 
             if (mCursor != null) {
                 mCursor.moveToFirst();
@@ -117,9 +120,11 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
         searchView.setIconifiedByDefault(false);
 
 
+
         listViewArticlesAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence constraint) {
+
                 return getCursor(constraint.toString());
             }
         });
@@ -143,9 +148,10 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewArticlesAdapter.setCursor(SqlQuery.getListArticle(getApplicationContext(),idInvoice));
+                    listViewArticlesAdapter.setCursor(SqlQuery.getListInventoryAction(getApplicationContext(), idInventory));
             }
         });
+
     }
 
     public String checkFilter(String filter, SearchView search){

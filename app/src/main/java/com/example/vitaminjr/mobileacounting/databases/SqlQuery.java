@@ -2,25 +2,28 @@ package com.example.vitaminjr.mobileacounting.databases;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.models.Article;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
+import com.example.vitaminjr.mobileacounting.models.InventoryAction;
+import com.example.vitaminjr.mobileacounting.models.InventoryRow;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.Provider;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
+import com.example.vitaminjr.mobileacounting.models.Store;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by vitaminjr on 08.08.16.
@@ -28,8 +31,8 @@ import java.util.regex.Pattern;
 public class SqlQuery {
 
     public static Cursor getListArticle(Context context, int invoiceId) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery(" SELECT ir.*, ir.invoice_row_id AS _id, " +
                 "   a.name as article_name, " +
                 "   a.unit_name as article_unit_name, " +
@@ -44,8 +47,7 @@ public class SqlQuery {
     }
 
     public static Cursor searchArticle(Context context, int invoiceId, String filter) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery(" SELECT ir.*, ir.invoice_row_id AS _id, " +
                 "   a.name as article_name, " +
                 "   a.unit_name as article_unit_name, " +
@@ -95,8 +97,7 @@ public class SqlQuery {
     }
 
     public static int getInvoiceRowCount(int invoiceId, Context context){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery(" SELECT COUNT(ir.invoice_row_id) AS _id " +
                 " FROM invoice_rows ir " +
                 " WHERE ir.invoice_id = " + invoiceId, null);
@@ -109,9 +110,8 @@ public class SqlQuery {
     public static void updateInvoiceRow(InvoiceRow invoiceRow, Context context)
     {
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        sqLiteDatabase.execSQL(" UPDATE invoice_rows " +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL(" UPDATE invoice_rows " +
                 " SET " +
                 "   barcode = "+ invoiceRow.getBarcode() + "," +
                 "   quantity_account = " + invoiceRow.getQuantityAccount() + "," +
@@ -121,14 +121,13 @@ public class SqlQuery {
                 "   datetime_change = " + invoiceRow.getDateTimeChange() +
                 " WHERE " +
                 "   invoice_row_id = " + invoiceRow.getInvoiceRowId() );
-        sqLiteDatabase.close();
+        db.close();
 
 
     }
 
     public static ResultTemplate getArticleByBarcode(String barcode, Context context, List<BarcodeTamplateInfo> listTamplate) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
         Cursor c;
         float quantity = -1;
@@ -255,8 +254,7 @@ public class SqlQuery {
     }
 
     public static InvoiceRow getInvoiceRowByArticleId(int articleId, int invoiceId, Context context) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery(" SELECT ir.*, " +
                 "   a.name as article_name, " +
                 "   a.unit_name as article_unit_name, " +
@@ -327,9 +325,8 @@ public class SqlQuery {
 
 
 
-    public static Cursor getInvoices(Context context, int invoiceTypeId) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+    public static Cursor exportInvoices(Context context, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
@@ -382,8 +379,7 @@ public class SqlQuery {
 
 
     public static Cursor getInvoiceById(Context context, long invoiceId) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
@@ -401,8 +397,7 @@ public class SqlQuery {
     }
 
     public static Cursor searchInvoice(Context context, String filter) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
@@ -422,8 +417,7 @@ public class SqlQuery {
     }
 
     public static Cursor getInvoiceById(Context context, int invoiceId) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
@@ -467,8 +461,7 @@ public class SqlQuery {
     }
 
     public static void insertInvoice(Context context, Invoice invoice) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("number",invoice.getNumberInvoice());
@@ -479,14 +472,13 @@ public class SqlQuery {
 
 
 
-        invoice.setInvoiceId( (int) sqLiteDatabase.insert("invoices","",values));
-        sqLiteDatabase.close();
+        invoice.setInvoiceId( (int) db.insert("invoices","",values));
+        db.close();
 
     }
 
     public static void insertInvoiceRow(InvoiceRow invoiceRow, Context context){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("invoice_id",invoiceRow.getInvoiceId());
@@ -500,27 +492,24 @@ public class SqlQuery {
         values.put("suma_account",invoiceRow.getSumaAccount());
         values.put("correction_type_id",invoiceRow.getCorrectionTypeId());
 
-        invoiceRow.setInvoiceRowId((int)sqLiteDatabase.insert("invoice_rows","",values));
+        invoiceRow.setInvoiceRowId((int)db.insert("invoice_rows","",values));
 
 
-        sqLiteDatabase.close();
-        dbHelper.close();
+        db.close();
     }
 
     public static void updateInvoice(Context context, Invoice invoice){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        sqLiteDatabase.execSQL("UPDATE invoices SET number = " + invoice.getNumberInvoice() + "," +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL("UPDATE invoices SET number = " + invoice.getNumberInvoice() + "," +
                 " provider_id = " + invoice.getProviderId() + "," + "date_d = '" + invoice.getDateCreateInvoice() + "', " + "invoice_code = " + invoice.getInvoiceCode() + " WHERE invoice_id = " + invoice.getInvoiceId() + ";");
-        sqLiteDatabase.close();
+        db.close();
 
     }
 
     public static Cursor getProviderById(Context context, long id){
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
                 "FROM providers" +
                 " WHERE providers.provider_id = " + String.valueOf(id) + ";", null);
 
@@ -529,9 +518,8 @@ public class SqlQuery {
 
     public static Cursor getListProvider(Context context, int typeAgent){
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
                 "FROM providers " +
                 "WHERE type_agent = " + typeAgent + ";", null);
         return cursor;
@@ -539,27 +527,27 @@ public class SqlQuery {
 
     public static Cursor searchProvider(Context context, int typeAgent, String filter){
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
                 "FROM providers " +
                 "WHERE (type_agent = " + typeAgent +  ") AND (name LIKE \"%" + filter + "%\" " +
                 "OR code_EDRPOU LIKE \"%" + filter + "%\" )" , null);
         return cursor;
     }
 
-    public static void getInvoices(Context context){
+    public static void exportInvoices(Context context){
 
-        context.deleteDatabase("/sdcard/mobileAcounting/invoices_result.odf");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","") + "invoices_result.odf";
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        context.deleteDatabase(nameBD);
 
-        DBHelperResult dbHelperResult = new DBHelperResult(context);
-        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
+        DBHelperResult dbHelper = new DBHelperResult(context, nameBD);
+        SQLiteDatabase sqLiteDatabaseResult = dbHelper.getWritableDatabase();
 
-        Cursor cursor =  sqLiteDatabase.rawQuery("SELECT * FROM invoices",null);
+        Cursor cursor =  db.rawQuery("SELECT * FROM invoices",null);
 
         List<Invoice> invoiceList = new ArrayList<>();
 
@@ -597,24 +585,25 @@ public class SqlQuery {
         }
     }
     public static void deleteInvoice(Context context, long id){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        sqLiteDatabase.execSQL("DELETE FROM invoices WHERE invoice_id = " + id + ";");
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL("DELETE FROM invoices WHERE invoice_id = " + id + ";");
     }
     public static void deleteInvoiceRow(Context context, long id){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        sqLiteDatabase.execSQL("DELETE FROM invoice_rows WHERE invoice_row_id = " + id + ";");
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL("DELETE FROM invoice_rows WHERE invoice_row_id = " + id + ";");
     }
 
-    public static void getInvoicesRows(Context context){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+    public static void exportInvoicesRows(Context context){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
-        DBHelperResult dbHelperResult = new DBHelperResult(context);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","") + "invoices_result.odf";
+        DBHelperResult dbHelperResult = new DBHelperResult(context, nameBD);
+
         SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
 
-        Cursor cursor =  sqLiteDatabase.rawQuery("SELECT * FROM invoice_rows",null);
+        Cursor cursor =  db.rawQuery("SELECT * FROM invoice_rows",null);
 
         List<InvoiceRow> invoiceRowList = new ArrayList<>();
 
@@ -647,9 +636,6 @@ public class SqlQuery {
                 invoiceRow.setCorrectionTypeId(cursor.getInt(correctionTypeIdColIndex));
                 invoiceRow.setDateTimeChange(cursor.getString(datetimeChangeColIndex));
 
-
-
-
                 invoiceRowList.add(invoiceRow);
 
             }while (cursor.moveToNext());
@@ -670,13 +656,15 @@ public class SqlQuery {
 
     }
 
-    public static void getInvoiceProviders(Context context){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+    public static void exportInvoiceProviders(Context context){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
-        DBHelperResult dbHelperResult = new DBHelperResult(context);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","") + "invoices_result.odf";
+        DBHelperResult dbHelperResult = new DBHelperResult(context, nameBD);
+
         SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT p.* " +
+        Cursor cursor = db.rawQuery("SELECT p.* " +
                 " FROM invoices inv " +
                 "      LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
                 " GROUP BY inv.provider_id"  , null);
@@ -714,16 +702,17 @@ public class SqlQuery {
     }
 
 
-    public static void getInvoicesRowTovars(Context context){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+    public static void exportInvoicesRowTovars(Context context){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT a.* " +
+        Cursor cursor = db.rawQuery("SELECT a.* " +
                 " FROM invoice_rows inv " +
                 "      LEFT JOIN articles a ON (a.article_id = inv.article_id) " +
                 " GROUP BY a.article_id" , null);
 
-        DBHelperResult dbHelperResult = new DBHelperResult(context);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","") + "invoices_result.odf";
+        DBHelperResult dbHelperResult = new DBHelperResult(context, nameBD);
         SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
 
 
@@ -748,8 +737,6 @@ public class SqlQuery {
                     article.setName("");
                 else
                     article.setName(cursor.getString(nameColIndex));
-
-                Log.d("name",article.getName());
 
                 article.setUnitName(cursor.getString(unitNameColIndex));
                 article.setPrice(cursor.getFloat(priceColIndex));
@@ -778,10 +765,9 @@ public class SqlQuery {
 
     public static List<BarcodeTamplateInfo> getBarcodeTemplates(Context context){
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
-        Cursor cursor = sqLiteDatabase.rawQuery(" SELECT * " +
+        Cursor cursor = db.rawQuery(" SELECT * " +
                 " FROM barcode_templates bt " , null);
 
         List<BarcodeTamplateInfo> listTamplate = new ArrayList<>();
@@ -802,41 +788,39 @@ public class SqlQuery {
 
     public static Cursor getPriceCheckItems(Context context){
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         String sqlQuery = " SELECT ab.barcode, a.code, a.name, a.unit_name, a.price, a.article_id AS _id" +
         " FROM price_check pc " +
         "     LEFT JOIN articles a ON (a.article_id = pc.article_id) " +
         "     LEFT JOIN article_barcodes ab ON (ab.article_id = a.article_id) " +
         " GROUP BY pc.article_id ";
 
-        Cursor cursor =  sqLiteDatabase.rawQuery(sqlQuery,null);
+        Cursor cursor =  db.rawQuery(sqlQuery,null);
 
         return cursor;
     }
 
     public static void clearCheckPrices(Context context){
-
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         String sqlQuery = " DELETE FROM price_check";
-        sqLiteDatabase.execSQL(sqlQuery);
+        db.execSQL(sqlQuery);
         Toast.makeText(context,"Очищено!!!",Toast.LENGTH_SHORT).show();
 
     }
 
     public static void exportPriceCheck(Context context){
 
-        context.deleteDatabase("/sdcard/mobileAcounting/price_check_result.odf");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","") + "price_check_result.odf";
 
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        context.deleteDatabase(nameBD);
 
-        DBHelperResultPriceCheck DBHelperResultPriceCheck = new DBHelperResultPriceCheck(context);
-        SQLiteDatabase sqLiteDatabaseResult = DBHelperResultPriceCheck.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
 
-        Cursor cursor =  sqLiteDatabase.rawQuery("SELECT * FROM price_check;",null);
+        DBHelperResultPriceCheck dbHelper = new DBHelperResultPriceCheck(context, nameBD);
+        SQLiteDatabase sqLiteDatabaseResult = dbHelper.getWritableDatabase();
+
+        Cursor cursor =  db.rawQuery("SELECT * FROM price_check;",null);
 
         if(cursor.moveToFirst()) {
 
@@ -854,48 +838,40 @@ public class SqlQuery {
     }
 
     public static void insertPriceCheck(Context context, InvoiceRow article){
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("article_id",article.getArticleId());
         contentValues.put("barcode",article.getBarcode());
 
-        sqLiteDatabase.insert("price_check","",contentValues);
+        db.insert("price_check","",contentValues);
     }
 
     public static Cursor getStores(Context context){
-
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         String sqlQuery = "SELECT store_id AS _id, name FROM stores ORDER BY name";
-        Cursor cursor =  sqLiteDatabase.rawQuery(sqlQuery, null);
+        Cursor cursor =  db.rawQuery(sqlQuery, null);
         return cursor;
     }
 
     public static Cursor getStoresById(Context context, long id){
-
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT store_id AS _id, name" +
-                "FROM stores" +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT store_id AS _id, name" +
+                " FROM stores" +
                 " WHERE store_id = " + String.valueOf(id) + ";", null);
 
         return cursor;
     }
 
     public static Cursor searchStores(Context context, String filter){
-
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT store_id AS _id, name" +
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT store_id AS _id, name " +
                 "FROM stores " +
                 "WHERE name LIKE \"%" + filter + "%\" ", null);
         return cursor;
     }
 
     public static Cursor getInventoriesCursor(Context context) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
                 "   inv.number, " +
                 "   inv.store_id, " +
@@ -922,7 +898,7 @@ public class SqlQuery {
             inventoryInvoice.setNumber(cursor.getString(numberColIndex));
             inventoryInvoice.setDate(cursor.getString(dateColIndex));
             inventoryInvoice.setStoreId(cursor.getInt(storeIdColIndex));
-            inventoryInvoice.setInventoryCode(cursor.getInt(idColIndex));
+            inventoryInvoice.setInventoryCode(cursor.getString(idColIndex));
             inventoryInvoice.setCreated(cursor.getInt(createdColIndex));
             inventoryInvoice.setNameStore(cursor.getString(nameColIndex));
 
@@ -930,8 +906,7 @@ public class SqlQuery {
         return inventoryInvoice;
     }
     public static Cursor getInventoriesByIdCursor(Context context, long id) {
-        DBHelper dbHelper = new DBHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
                 "   inv.number, " +
                 "   inv.store_id, " +
@@ -940,9 +915,528 @@ public class SqlQuery {
                 "   inv.created" +
                 " FROM inventories inv " +
                 "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
-                "WHERE inv.store_id = " + id +
+                "WHERE inv.inventory_id = " + id +
                 " ORDER BY inv.number ", null);
         return c;
+    }
+
+    public static List getListInventory(Cursor cursor){
+        List inventoryList = new ArrayList<>();
+        if(cursor.moveToFirst()) {
+
+            int idColIndex = cursor.getColumnIndex("_id");
+            int numberColIndex = cursor.getColumnIndex("number");
+            int storeIdColIndex = cursor.getColumnIndex("store_id");
+            int nameColIndex = cursor.getColumnIndex("store_name");
+            int dateColIndex = cursor.getColumnIndex("date_d");
+            int createdColIndex = cursor.getColumnIndex("created");
+
+            do {
+                InventoryInvoice inventoryInvoice = new InventoryInvoice();
+                inventoryInvoice.setInventoryId(Integer.parseInt(cursor.getString(idColIndex)));
+                inventoryInvoice.setNumber(cursor.getString(numberColIndex));
+                inventoryInvoice.setDate(cursor.getString(dateColIndex));
+                inventoryInvoice.setStoreId(cursor.getInt(storeIdColIndex));
+                inventoryInvoice.setInventoryCode(cursor.getString(idColIndex));
+                inventoryInvoice.setCreated(cursor.getInt(createdColIndex));
+                inventoryInvoice.setNameStore(cursor.getString(nameColIndex));
+
+
+
+                inventoryList.add(inventoryInvoice);
+
+            }while (cursor.moveToNext());
+        }
+        return inventoryList;
+    }
+
+
+
+    public static void insertInventory(Context context, InventoryInvoice inventoryInvoice){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("number", inventoryInvoice.getNumber());
+        values.put("date_d", inventoryInvoice.getDate());
+        values.put("store_id",inventoryInvoice.getStoreId());
+        values.put("created",inventoryInvoice.getCreated());
+        inventoryInvoice.setInventoryId(db.insert("inventories","",values));
+    }
+
+    public static void updateInventory(Context context, InventoryInvoice inventoryInvoice){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+/*        values.put("inventory_id",inventoryInvoice.getInventoryId());*/
+        values.put("inventory_code",inventoryInvoice.getInventoryId());
+        values.put("number", inventoryInvoice.getNumber());
+        values.put("date_d", inventoryInvoice.getDate());
+        values.put("store_id",inventoryInvoice.getStoreId());
+        values.put("created",inventoryInvoice.getCreated());
+        db.update("inventories", values,"inventory_id = ?",
+                new String[] { String.valueOf(inventoryInvoice.getInventoryId())});
+    }
+
+
+    public static InventoryAction getArticle(Cursor cursor){
+        InventoryAction inventoryAction = new InventoryAction();
+        Article article = new Article();
+        if(cursor.moveToFirst()) {
+            int articleIdColIndex = cursor.getColumnIndex("_id");
+            int nameColIndex = cursor.getColumnIndex("name");
+            int unitNameColIndex = cursor.getColumnIndex("unit_name");
+            int barcodeColIndex = cursor.getColumnIndex("barcode");
+
+            do {
+
+                article.setArticleId(cursor.getInt(articleIdColIndex));
+                article.setName(cursor.getString(nameColIndex));
+                article.setUnitName(cursor.getString(unitNameColIndex));
+                inventoryAction.setBarcode(cursor.getString(barcodeColIndex));
+                inventoryAction.setArticleId(cursor.getInt(articleIdColIndex));
+                inventoryAction.setArticle(article);
+            }
+            while (cursor.moveToNext());
+        }
+        return inventoryAction;
+    }
+
+
+    public static void insertInventoryAction(InventoryAction inventoryAction, Context context){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("inventory_id",inventoryAction.getInventoryId());
+        values.put("article_id",inventoryAction.getArticleId());
+        values.put("barcode",inventoryAction.getBarcode());
+        values.put("quantity",inventoryAction.getQuantity());
+        values.put("date_d",inventoryAction.getDate());
+        values.put("time_t",inventoryAction.getTime());
+        values.put("action_type_id",inventoryAction.getActionTypeId());
+
+        db.insert("inventory_action","",values);
+    }
+
+    public static long getInventoryRowsQuantity(Context context, long inventoryId, long articleId){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        String query = " SELECT inventory_row_id AS _id, SUM(invr.quantity_account) as quantity_account " +
+        " FROM inventory_rows invr " +
+        " WHERE invr.inventory_id = " + inventoryId + " AND invr.article_id = " + articleId;
+        Cursor cursor = db.rawQuery(query,null);
+        long quantityAccount = 0;
+
+        if(cursor.moveToFirst()) {
+            int inventoryRowIdColIndex = cursor.getColumnIndex("_id");
+            int quantityAccountColIndex = cursor.getColumnIndex("quantity_account");
+
+            quantityAccount = cursor.getLong(quantityAccountColIndex);
+            while (cursor.moveToNext());
+        }
+        return quantityAccount;
+    }
+
+
+    public static long getInventoryActionQuantity(Context context, long inventoryId, long articleId){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        String query = " SELECT inventory_action_id AS _id, SUM(inva.quantity) as quantity_actual " +
+        " FROM inventory_action inva " +
+                " WHERE inva.inventory_id = " + inventoryId + " AND inva.article_id = " + articleId;
+        Cursor cursor = db.rawQuery(query,null);
+        long quantityAccount = 0;
+
+        if(cursor.moveToFirst()) {
+            int inventoryRowIdColIndex = cursor.getColumnIndex("_id");
+            int quantityAccountColIndex = cursor.getColumnIndex("quantity_actual");
+
+            quantityAccount = cursor.getLong(quantityAccountColIndex);
+            while (cursor.moveToNext());
+        }
+        return quantityAccount;
+    }
+
+    public static Cursor getListInventoryAction(Context context, long id) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery(" SELECT inva.inventory_id AS _id, a.article_id, a.code, a.name AS article_name, a.unit_name AS article_unit_name, " +
+                " inva.barcode, inva.inventory_action_id, inva.date_d, inva.time_t, inva.action_type_id, " +
+                " (SELECT SUM(quantity_account) FROM inventory_rows WHERE inventory_id = inv.inventory_id AND article_id = a.article_id) as quantity, " +
+                " (SELECT SUM(quantity) FROM inventory_action WHERE inventory_id = inv.inventory_id AND article_id = a.article_id) as quantity_account " +
+                " FROM inventories inv " +
+                "    LEFT JOIN inventory_rows invr ON (inv.inventory_id = invr.inventory_id) " +
+                "    LEFT JOIN inventory_action inva ON (inv.inventory_id = inva.inventory_id) " +
+                "    LEFT JOIN articles a ON (a.article_id = invr.article_id OR a.article_id = inva.article_id) " +
+                " WHERE inv.inventory_id = " + id + " AND a.article_id IS NOT NULL " +
+                " GROUP BY a.article_id  " +
+                " ORDER BY a.name", null);
+        return c;
+    }
+
+
+    public static Cursor searchArticleInventory(Context context, long inventoryId, String filter) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery(" SELECT inva.barcode, a.article_id AS _id, " +
+                "   a.name as article_name, " +
+                "   a.unit_name as article_unit_name, " +
+                " (SELECT SUM(quantity) FROM inventory_action WHERE inventory_id = inv.inventory_id AND article_id = a.article_id) as quantity_account " +
+                " FROM inventories inv " +
+                "    LEFT JOIN inventory_rows invr ON (inv.inventory_id = invr.inventory_id) " +
+                "    LEFT JOIN inventory_action inva ON (inv.inventory_id = inva.inventory_id) " +
+                "    LEFT JOIN articles a ON (a.article_id = invr.article_id OR a.article_id = inva.article_id) " +
+                " WHERE (inv.inventory_id = " + inventoryId + ") AND (article_name  LIKE \"%" + filter + "%\"" +
+                " OR inva.barcode LIKE \"%" + filter + "%\")" +
+                " GROUP BY a.article_id", null);
+
+        return c;
+    }
+
+
+    public static InventoryAction getInventoryActionFromPosition(Cursor cursor, int position){
+        InventoryAction action = new InventoryAction();
+        if(cursor.moveToPosition(position)) {
+            int inventoryIdColIndex = cursor.getColumnIndex("_id");
+            int inventoryActionIdIdColIndex = cursor.getColumnIndex("inventory_action_id");
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
+            int nameColIndex = cursor.getColumnIndex("article_name");
+            int unitNameColIndex = cursor.getColumnIndex("article_unit_name");
+            int barcodeColIndex = cursor.getColumnIndex("barcode");
+            int quantityColIndex = cursor.getColumnIndex("quantity_account");
+            int dateColIndex = cursor.getColumnIndex("date_d");
+            int timeColIndex = cursor.getColumnIndex("time_t");
+            int typeIdColIndex = cursor.getColumnIndex("action_type_id");
+
+            action.setInventoryActionId(cursor.getLong(inventoryActionIdIdColIndex));
+            action.setInventoryId(cursor.getLong(inventoryIdColIndex));
+            action.setArticleId(cursor.getLong(articleIdColIndex));
+
+            Article article = new Article();
+            article.setName(cursor.getString(nameColIndex));
+            article.setUnitName(cursor.getString(unitNameColIndex));
+
+            action.setBarcode(cursor.getString(barcodeColIndex));
+            action.setArticle(article);
+
+            action.setDate(cursor.getString(dateColIndex));
+            action.setTime(cursor.getString(timeColIndex));
+            action.setActionTypeId(cursor.getInt(typeIdColIndex));
+
+            action.setQuantity(cursor.getFloat(quantityColIndex));
+        }
+
+        return action;
+    }
+
+
+    public static void deleteInventoryItem(Context context, long inventoryId, long articleId){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL(" DELETE FROM inventory_action " +
+                " WHERE inventory_id =  " + inventoryId + " AND article_id = " + articleId );
+    }
+
+
+    public static Cursor searchInventory(Context context, String filter) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
+                "   inv.number, " +
+                "   inv.store_id, " +
+                "   s.name as store_name, " +
+                "   inv.date_d, " +
+                "   inv.created" +
+                " FROM inventories inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
+                " WHERE inv.number LIKE \"%" + filter + "%\" OR " +
+                "       s.name  LIKE \"%" + filter + "%\"" +
+                " ORDER BY inv.number ", null);
+
+        return c;
+    }
+
+
+
+    public static void exportInventories(Context context){
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "inventory_result.odf";
+
+        context.deleteDatabase(nameBD);
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        DBHelperResultInventories dbHelper = new DBHelperResultInventories(context, nameBD);
+        SQLiteDatabase sqLiteDatabaseResult = dbHelper.getWritableDatabase();
+
+        Cursor cursor =  db.rawQuery("SELECT * FROM inventories",null);
+
+        List<InventoryInvoice> inventoryInvoiceList = new ArrayList<>();
+
+        if(cursor.moveToFirst()) {
+
+            int idColIndex = cursor.getColumnIndex("inventory_id");
+            int codeColIndex = cursor.getColumnIndex("inventory_code");
+            int numberIdColIndex = cursor.getColumnIndex("number");
+            int storeColIndex = cursor.getColumnIndex("store_id");
+            int dateColIndex = cursor.getColumnIndex("date_d");
+            int createdColIndex = cursor.getColumnIndex("created");
+
+            do {
+
+                InventoryInvoice inventoryInvoice = new InventoryInvoice();
+
+                    inventoryInvoice.setInventoryId(Long.parseLong(cursor.getString(idColIndex)));
+                    inventoryInvoice.setInventoryCode(cursor.getString(codeColIndex));
+                    inventoryInvoice.setNumber(cursor.getString(numberIdColIndex));
+                    inventoryInvoice.setStoreId(cursor.getLong(storeColIndex));
+                    inventoryInvoice.setDate(cursor.getString(dateColIndex));
+                    inventoryInvoice.setCreated(cursor.getInt(createdColIndex));
+
+                inventoryInvoiceList.add(inventoryInvoice);
+
+            }while (cursor.moveToNext());
+        }
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < inventoryInvoiceList.size(); i++) {
+
+            values.put("inventory_id",inventoryInvoiceList.get(i).getInventoryId());
+            values.put("inventory_code",inventoryInvoiceList.get(i).getInventoryCode());
+            values.put("number", inventoryInvoiceList.get(i).getNumber());
+            values.put("store_id", inventoryInvoiceList.get(i).getStoreId());
+            values.put("date_d", inventoryInvoiceList.get(i).getDate());
+            values.put("created", inventoryInvoiceList.get(i).getCreated());
+
+            sqLiteDatabaseResult.insert("inventories","",values);
+
+         }
+    }
+
+
+    public static void exportInventoryAction(Context context){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "inventory_result.odf";
+        DBHelperResultInventories dbHelperResult = new DBHelperResultInventories(context, nameBD);
+
+        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+
+
+        Cursor cursor =  db.rawQuery("SELECT * FROM inventory_action",null);
+
+        List<InventoryAction> inventoryActionList = new ArrayList<>();
+
+        if(cursor.moveToFirst()) {
+
+            int inventoryActionIdColIndex = cursor.getColumnIndex("inventory_action_id");
+            int inventoryIdColIndex = cursor.getColumnIndex("inventory_id");
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
+            int barcodeColIndex = cursor.getColumnIndex("barcode");
+            int quantityColIndex = cursor.getColumnIndex("quantity");
+            int dateColIndex = cursor.getColumnIndex("date_d");
+            int timeColIndex = cursor.getColumnIndex("time_t");
+            int actionTypeIdColIndex = cursor.getColumnIndex("action_type_id");
+
+            do {
+
+                InventoryAction inventoryAction = new InventoryAction();
+                inventoryAction.setInventoryActionId(Long.parseLong(cursor.getString(inventoryActionIdColIndex)));
+                inventoryAction.setInventoryId(Long.parseLong(cursor.getString(inventoryIdColIndex)));
+                inventoryAction.setArticleId(Long.parseLong(cursor.getString(articleIdColIndex)));
+                inventoryAction.setBarcode(cursor.getString(barcodeColIndex));
+                inventoryAction.setQuantity(cursor.getFloat(quantityColIndex));
+                inventoryAction.setDate(cursor.getString(dateColIndex));
+                inventoryAction.setTime(cursor.getString(timeColIndex));
+                inventoryAction.setActionTypeId(cursor.getInt(actionTypeIdColIndex));
+
+                inventoryActionList.add(inventoryAction);
+
+            }while (cursor.moveToNext());
+        }
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < inventoryActionList.size(); i++) {
+
+            values.put("inventory_action_id",inventoryActionList.get(i).getInventoryActionId());
+            values.put("inventory_id",inventoryActionList.get(i).getInventoryId());
+            values.put("article_id", inventoryActionList.get(i).getArticleId());
+            values.put("barcode", inventoryActionList.get(i).getBarcode());
+            values.put("quantity", inventoryActionList.get(i).getQuantity());
+            values.put("date_d", inventoryActionList.get(i).getDate());
+            values.put("time_t", inventoryActionList.get(i).getTime());
+            values.put("action_type_id", inventoryActionList.get(i).getActionTypeId());
+
+            sqLiteDatabaseResult.insert("inventory_action","",values);
+
+        }
+    }
+
+    public static void exportInventoryRows(Context context){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "inventory_result.odf";
+        DBHelperResultInventories dbHelperResult = new DBHelperResultInventories(context, nameBD);
+
+        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+
+
+        Cursor cursor =  db.rawQuery("SELECT * FROM inventory_rows",null);
+
+        List<InventoryRow> inventoryRowList = new ArrayList<>();
+
+        if(cursor.moveToFirst()) {
+
+            int inventoryRowIdColIndex = cursor.getColumnIndex("inventory_row_id");
+            int inventoryIdColIndex = cursor.getColumnIndex("inventory_id");
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
+            int quantityAccountColIndex = cursor.getColumnIndex("quantity_account");
+
+            do {
+
+                InventoryRow inventoryRow = new InventoryRow();
+                inventoryRow.setInventoryRowId(Long.parseLong(cursor.getString(inventoryRowIdColIndex)));
+                inventoryRow.setInventoryId(Long.parseLong(cursor.getString(inventoryIdColIndex)));
+                inventoryRow.setArticleId(Long.parseLong(cursor.getString(articleIdColIndex)));
+                inventoryRow.setQuantityAccount(cursor.getFloat(quantityAccountColIndex));
+
+
+                inventoryRowList.add(inventoryRow);
+
+            }while (cursor.moveToNext());
+        }
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < inventoryRowList.size(); i++) {
+
+            values.put("inventory_row_id",inventoryRowList.get(i).getInventoryRowId());
+            values.put("inventory_id",inventoryRowList.get(i).getInventoryId());
+            values.put("article_id", inventoryRowList.get(i).getArticleId());
+            values.put("quantity_account", inventoryRowList.get(i).getQuantityAccount());
+
+
+            sqLiteDatabaseResult.insert("inventory_rows","",values);
+
+        }
+    }
+
+
+    public static void exportStores(Context context){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "inventory_result.odf";
+        DBHelperResultInventories dbHelperResult = new DBHelperResultInventories(context, nameBD);
+        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+
+
+        Cursor cursor =  db.rawQuery("SELECT * FROM stores",null);
+
+        List<Store> storeList = new ArrayList<>();
+
+        if(cursor.moveToFirst()) {
+
+            int storeId = cursor.getColumnIndex("store_id");
+            int storeCode = cursor.getColumnIndex("store_code");
+            int name = cursor.getColumnIndex("name");
+
+            do {
+
+                Store store = new Store();
+                store.setStoreId(Long.parseLong(cursor.getString(storeId)));
+                store.setStoreCode(Long.parseLong(cursor.getString(storeCode)));
+                store.setName(cursor.getString(name));
+
+
+                storeList.add(store);
+
+            }while (cursor.moveToNext());
+        }
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < storeList.size(); i++) {
+
+            values.put("store_id",storeList.get(i).getStoreId());
+            values.put("store_code",storeList.get(i).getStoreCode());
+            values.put("name", storeList.get(i).getName());
+
+
+            sqLiteDatabaseResult.insert("stores","",values);
+
+        }
+    }
+
+
+    public static void exportArticlesInventory(Context context){
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "inventory_result.odf";
+        DBHelperResultInventories dbHelperResult = new DBHelperResultInventories(context, nameBD);;
+        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+
+        String query = "SELECT a.* " +
+        " FROM inventories inv  " +
+        "    LEFT JOIN inventory_rows invr ON (inv.inventory_id = invr.inventory_id)  " +
+        "    LEFT JOIN inventory_action inva ON (inv.inventory_id = inva.inventory_id)  " +
+        "    LEFT JOIN articles a ON (a.article_id = invr.article_id OR a.article_id = inva.article_id)  " +
+        " WHERE a.article_id IS NOT NULL " +
+        " GROUP BY a.article_id ";
+
+
+        Cursor cursor =  db.rawQuery(query,null);
+
+        List<Article> articleList = new ArrayList<>();
+
+        if(cursor.moveToFirst()) {
+
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
+            int articleCodeColIndex = cursor.getColumnIndex("article_code");
+            int codeColIndex = cursor.getColumnIndex("code");
+            int nameColIndex = cursor.getColumnIndex("name");
+            int unitNameColIndex = cursor.getColumnIndex("unit_name");
+            int priceColIndex = cursor.getColumnIndex("price");
+            int quantityRemainsColIndex = cursor.getColumnIndex("quantity_remains");
+
+            do {
+
+                Article article = new Article();
+                article.setArticleId(cursor.getInt(articleIdColIndex));
+                article.setArticleCode(cursor.getString(articleCodeColIndex));
+                article.setCode(cursor.getString(codeColIndex));
+                article.setName(cursor.getString(nameColIndex));
+                article.setUnitName(cursor.getString(unitNameColIndex));
+                article.setPrice(cursor.getFloat(priceColIndex));
+                article.setQuantityRemains(cursor.getFloat(quantityRemainsColIndex));
+
+
+                articleList.add(article);
+
+            }while (cursor.moveToNext());
+        }
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < articleList.size(); i++) {
+
+            values.put("article_id",articleList.get(i).getArticleId());
+            values.put("article_code",articleList.get(i).getArticleCode());
+            values.put("code", articleList.get(i).getCode());
+            values.put("name", articleList.get(i).getName());
+            values.put("unit_name", articleList.get(i).getUnitName());
+            values.put("price", articleList.get(i).getPrice());
+            values.put("quantity_remains", articleList.get(i).getQuantityRemains());
+
+
+            sqLiteDatabaseResult.insert("articles","",values);
+
+        }
+    }
+
+
+    public static DBHelper newDBHelper(Context context){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_input","");
+        DBHelper dbHelper = new DBHelper(context, nameBD);
+        return dbHelper;
     }
 
 }

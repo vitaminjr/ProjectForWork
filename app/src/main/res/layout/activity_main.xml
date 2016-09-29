@@ -1,12 +1,15 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#E0E0E0"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.MainActivity">
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/frameLayout">
 
                 <android.support.v7.widget.Toolbar
                     android:layout_width="match_parent"
@@ -22,12 +25,266 @@
 
         </FrameLayout>
 
-
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="579dp"
-            android:id="@+id/fragment_container"
-            android:layout_gravity="center_horizontal|bottom">
-        </FrameLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/button_invoice"
+            android:layout_gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            android:layout_below="@+id/frameLayout"
+            style="@style/button_styles_main_activity">
 
-</FrameLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/style_header_text_view">
+
+                        <TextView
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:text="Накладні"
+                            android:textSize="20dp"
+                            android:padding="10dp"
+                            android:textColor="#1d488c"
+                            android:textStyle="bold"
+                            />
+
+
+                        <android.support.v7.widget.AppCompatImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:src="@drawable/ic_file_upload_white_24dp"
+                            android:id="@+id/button_export_invoice"
+                            android:layout_weight="2"
+                            style="@style/button_styles_export"
+                            />
+
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Прихідна накладна"
+                    android:textSize="20dp"
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/edit_profit_invoice"
+                    style="@style/button_styles_main_activity"
+
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Видаткова накладна"
+                    android:textSize="20dp"
+                    android:padding="10dp"
+                    android:id="@+id/edit_expense_invoice"
+                    style="@style/button_styles_main_activity"
+                    />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/buttonInventory"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/button_price_check"
+            style="@style/button_styles_main_activity">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/style_header_text_view">
+
+                        <TextView
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:text="Перевірка цін"
+                            android:textSize="20dp"
+                            android:padding="10dp"
+                            android:textColor="#1d488c"
+                            android:textStyle="bold"
+                            />
+
+
+                        <android.support.v7.widget.AppCompatImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/button_export_price_check"
+                            android:src="@drawable/ic_file_upload_white_24dp"
+                            android:layout_weight="2"
+                            style="@style/button_styles_export"
+                            />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="створити"
+                            android:id="@+id/create_price_check"
+                            android:layout_marginLeft="30dp"
+                            android:textSize="18dp"
+                            android:padding="10dp"
+                            android:layout_weight="1"
+                            android:textColor="#FF21509B"
+                            />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="редагувати"
+                            android:id="@+id/edit_price_check"
+                            android:textSize="18dp"
+                            android:padding="10dp"
+                            android:layout_marginRight="20dp"
+                            android:textColor="#FF21509B"
+                            style="@style/button_styles_main_activity"
+                            />
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/button_invoice"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/buttonInventory"
+            style="@style/button_styles_main_activity"
+            android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/style_header_text_view">
+
+                        <TextView
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:text="Інвентаризація"
+                            android:textSize="20dp"
+                            android:padding="10dp"
+                            android:textColor="#1d488c"
+                            android:textStyle="bold"
+                            />
+
+
+                        <android.support.v7.widget.AppCompatImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/button_export_inventory"
+                            android:src="@drawable/ic_file_upload_white_24dp"
+                            android:layout_weight="2"
+                            style="@style/button_styles_export"
+                            />
+
+
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="редагувати"
+                            android:id="@+id/edit_inventory"
+                            android:layout_marginLeft="30dp"
+                            android:textSize="18dp"
+                            android:layout_weight="1"
+                            android:padding="10dp"
+                            android:textColor="#FF21509B"
+                            />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="переглянути"
+                            android:id="@+id/review_inventory"
+                            android:layout_marginRight="20dp"
+                            android:textSize="18dp"
+                            android:padding="10dp"
+                            android:textColor="#FF21509B"
+                            style="@style/button_styles_main_activity"
+                            />
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+<com.getbase.floatingactionbutton.FloatingActionsMenu
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    app:fab_addButtonColorNormal="@color/common_action_bar_splitter"
+    app:fab_addButtonColorPressed="#BDBDBD"
+    app:fab_addButtonPlusIconColor="@color/black"
+    app:fab_labelStyle="@style/menu_styles_label">
+
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_addButtonSize="normal"
+            android:id="@+id/button_download"
+            app:fab_icon="@drawable/ic_file_download_white_24dp"
+            app:fab_colorNormal="#0091EA"
+            app:fab_colorPressed="#00B0FF"
+            app:fab_title="Загрузити БД"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_settings"
+            app:fab_addButtonSize="normal"
+            app:fab_icon="@drawable/ic_settings_white_24dp"
+            app:fab_colorNormal="#2962FF"
+            app:fab_colorPressed="#2979FF"
+            app:fab_title="Налаштування"/>
+
+</com.getbase.floatingactionbutton.FloatingActionsMenu>
+
+
+</RelativeLayout>

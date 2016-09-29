@@ -20,12 +20,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE article_barcodes ("
+        db.execSQL("CREATE TABLE IF NOT EXISTS article_barcodes ("
                 + "article_barcode_id integer PRIMARY KEY AUTOINCREMENT,"
                 + "article_id        integer,"
                 + "barcode           varchar(20)" + ");");
 
-        db.execSQL("CREATE TABLE articles ("
+        db.execSQL("CREATE TABLE IF NOT EXISTS articles ("
                 + "article_id integer PRIMARY KEY AUTOINCREMENT,"
                 + "article_code      varchar(50),"
                 + "code              varchar(50),"
@@ -34,12 +34,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 + "price             float(15,3),"
                 + "quantity_remains  float(15,3)" + ");");
 
-        db.execSQL("CREATE TABLE barcode_templates ("
+        db.execSQL("CREATE TABLE IF NOT EXISTS barcode_templates ("
                 + "barcode_template_id integer PRIMARY KEY AUTOINCREMENT,"
                 + "TYPE            integer,"
                 + "template          varchar(20) " + ");");
 
-        db.execSQL("CREATE TABLE inventories (   " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS inventories (   " +
                 "inventory_id  integer PRIMARY KEY AUTOINCREMENT,   " +
                 "inventory_code  varchar(50),   " +
                 "NUMBER          varchar(50),   " +
@@ -47,7 +47,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "date_d          integer,   " +
                 "created         integer " + ");");
 
-        db.execSQL("CREATE TABLE inventory_action (    " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS inventory_action (    " +
                 "inventory_action_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "inventory_id         integer," +
                 "article_id           integer," +
@@ -57,13 +57,13 @@ public class DBHelper extends SQLiteOpenHelper {
                 "time_t               time," +
                 "action_type_id       integer " + ");");
 
-        db.execSQL("CREATE TABLE inventory_rows (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS inventory_rows (" +
                 "inventory_row_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "inventory_id      integer," +
                 "article_id        integer," +
                 "quantity_account  float(15,3)" + ");");
 
-        db.execSQL("CREATE TABLE invoice_rows (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS invoice_rows (" +
                 "invoice_row_id      integer PRIMARY KEY AUTOINCREMENT," +
                 "invoice_id          integer," +
                 "barcode             varchar(20)," +
@@ -77,7 +77,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "correction_type_id  integer," +
                 "datetime_change     datetime " + ");");
 
-        db.execSQL("CREATE TABLE invoices (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS invoices (" +
                 "invoice_id       integer PRIMARY KEY AUTOINCREMENT," +
                 "invoice_code     varchar(50)," +
                 "NUMBER           varchar(50)," +
@@ -86,19 +86,19 @@ public class DBHelper extends SQLiteOpenHelper {
                 "invoice_type_id  integer," +
                 "created          integer DEFAULT 0" + ");");
 
-        db.execSQL("CREATE TABLE price_check (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS price_check (" +
                 "price_check_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "barcode         varchar(20)," +
                 "article_id      integer " + ");");
 
-        db.execSQL("CREATE TABLE providers (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS providers (" +
                 "provider_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "provider_code  varchar(50)," +
                 "code_EDRPOU  integer," +
                 "name         varchar(100)," +
                 "type_agent   integer DEFAULT 0 " + ");");
 
-        db.execSQL("CREATE TABLE stores (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS stores (" +
                 "store_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "store_code  varchar(50)," +
                 "name       varchar(50) " + ");");

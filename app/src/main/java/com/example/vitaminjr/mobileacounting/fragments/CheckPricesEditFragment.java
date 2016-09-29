@@ -76,6 +76,7 @@ public class CheckPricesEditFragment extends Fragment {
         editTextPriceTag = (EditText) view.findViewById(R.id.text_view_price_tag);
         textViewUnitName = (TextView) view.findViewById(R.id.text_name_article);
         textViewNameArticle = (TextView) view.findViewById(R.id.text_unit_article);
+        editTextBarcode.requestFocus();
         editTextBarcodeArticleAction(true,true,true);
         editTextPriceTagArticleAction(false,false,false);
     }
@@ -90,7 +91,9 @@ public class CheckPricesEditFragment extends Fragment {
 
                     if(!String.valueOf(editTextBarcode.getText()).equals("")) {
 
-                        String barcode = String.valueOf(editTextBarcode.getText());
+                        String tempBarcode = String.valueOf(editTextBarcode.getText());
+
+                        String barcode = tempBarcode.replace('*','\n');
 
                         listTemplate = SqlQuery.getBarcodeTemplates(getContext());
 

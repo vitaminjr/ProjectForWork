@@ -1,9 +1,11 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,8 @@ import com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditActivity;
 import com.example.vitaminjr.mobileacounting.activities.InventoryEditActivity;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewInventoryAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.interfaces.OnEventListener;
+import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
 import com.melnykov.fab.FloatingActionButton;
@@ -26,8 +30,9 @@ public class InventoryFragment extends Fragment {
 
 
     ListView listView;
-    ListViewInventoryAdapter adapter;
-
+    public ListViewInventoryAdapter adapter;
+    OnEventListener onSomeEventListener;
+    FloatingActionButton floatingActionButton;
 
     public static InventoryFragment newInstance() {
 
@@ -38,11 +43,17 @@ public class InventoryFragment extends Fragment {
         return fragment;
     }
 
-
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+
+            onSomeEventListener= (OnEventListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement onSomeEventListener");
+        }
     }
+
 
     @Nullable
     @Override
@@ -57,7 +68,7 @@ public class InventoryFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,7 +80,7 @@ public class InventoryFragment extends Fragment {
 
         listView = (ListView) getActivity().findViewById(R.id.listView);
         adapter = new ListViewInventoryAdapter(getContext(), SqlQuery.getInventoriesCursor(getContext()),true);
-        //onSomaEventListener.someEvent(adapter);
+        onSomeEventListener.someEvent(adapter);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -79,10 +90,17 @@ public class InventoryFragment extends Fragment {
                 Intent intent = new Intent(getContext(), InventoryEditActivity.class);
                 intent.putExtra("id", id);
                 intent.putExtra("position", position);
-                InventoryInvoice inventoryInvoice = SqlQuery.getInventoriesInvoice(SqlQuery.getInventoriesByIdCursor(getContext(), id));
-                intent.putExtra("created", inventoryInvoice.getCreated());
                 startActivity(intent);
             }
         });
+        floatingActionButton.attachToListView(listView);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter = new ListViewInventoryAdapter(getContext(), SqlQuery.getInventoriesCursor(getContext()),true);
+        listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 }

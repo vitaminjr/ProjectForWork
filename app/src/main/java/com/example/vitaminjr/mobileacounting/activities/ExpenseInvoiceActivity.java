@@ -85,10 +85,10 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
                                     initEditFragment();
                                     break;
                                 case EXPORT:
-                                    SqlQuery.getInvoices(getApplicationContext());
-                                    SqlQuery.getInvoicesRows(getApplicationContext());
-                                    SqlQuery.getInvoicesRowTovars(getApplicationContext());
-                                    SqlQuery.getInvoiceProviders(getApplicationContext());
+                                    SqlQuery.exportInvoices(getApplicationContext());
+                                    SqlQuery.exportInvoicesRows(getApplicationContext());
+                                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
+                                    SqlQuery.exportInvoiceProviders(getApplicationContext());
                                     break;
                             }
                         }
@@ -158,7 +158,7 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewAdapter.setCursor(SqlQuery.getInvoices(getApplicationContext(),InvoiceType.expense.ordinal()));
+                    listViewAdapter.setCursor(SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.expense.ordinal()));
             }
         });
 
@@ -168,7 +168,7 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
         if (str == null  ||  str.length () == 0)  {
-            mCursor = SqlQuery.getInvoices(getApplicationContext(),InvoiceType.expense.ordinal());
+            mCursor = SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.expense.ordinal());
         }
         else {
             mCursor = SqlQuery.searchInvoice(this, str);

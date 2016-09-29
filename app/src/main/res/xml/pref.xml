@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference android:key="address_input"
+        android:summary="Адреса вхідного файла"
+        android:title="Вхідний файл"
+        />
+
+    <EditTextPreference android:key="address_output"
+        android:summary="Адреса виідного каталогу"
+        android:title="Вихідні файли"
+        />
+
+    <EditTextPreference android:key="url_upload_db"
+        android:summary="Url Адреса сервера відправки даних"
+        android:title="Адреса відправки"
+        />
+    <EditTextPreference android:key="url_download_db"
+        android:summary="Url Адреса сервера получення даних"
+        android:title="Адреса отримання"
+        />
+    <CheckBoxPreference android:key="count"
+        android:summary="Виводити кількість по обліку"
+        android:title="Кількість" >
+
+    </CheckBoxPreference>
+
+
+
+</PreferenceScreen>

@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:id="@+id/text_number_invoice"
+            android:id="@+id/text_number_inventory"
             android:textSize="20dp"/>
 
     </LinearLayout>
@@ -35,13 +35,14 @@
         android:layout_width="match_parent"
         android:layout_gravity="center"
         android:hint="@string/barcode"
-        android:id="@+id/edit_text_barcode_invoice"
+        android:id="@+id/edit_text_barcode_inventory"
         android:inputType="text"
         android:textSize="20dp"
         android:layout_height="49dp"
         android:layout_margin="5dp"
         android:background="@drawable/rect"
         android:gravity="center"
+        android:digits="0,1,2,3,4,5,6,7,8,9,*"
         />
     
     <LinearLayout
@@ -73,8 +74,6 @@
             />
 
     </LinearLayout>
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -131,7 +130,7 @@
             android:layout_width="wrap_content"
             android:layout_weight="3"
             android:layout_gravity="center"
-            android:inputType="numberDecimal"
+            android:inputType="text"
             android:textSize="20dp"
             android:hint="@string/count"
             android:layout_height="49dp"
@@ -163,19 +162,20 @@
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginRight="32dp">
+            android:layout_marginRight="32dp"
+            android:id="@+id/linear_layout_fact">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:textSize="20dp"
                 android:layout_height="wrap_content"
-                android:text="@string/price"
+                android:text="@string/fact"
                 />
 
             <EditText
                 android:layout_width="wrap_content"
 
-                android:id="@+id/text_view_price_article"
+                android:id="@+id/text_view_fact_count_article"
                 android:layout_marginLeft="10dp"
                 android:inputType="numberDecimal"
                 android:textSize="20dp"
@@ -183,43 +183,11 @@
                 android:gravity="center"
                 style="@style/editStyle2"
                 android:minWidth="100dp"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginRight="38dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Сума"
-                android:layout_gravity="center"
-                android:textSize="20dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:id="@+id/text_view_suma_article"
-                android:textSize="20dp"
                 android:enabled="false"
-                android:layout_height="49dp"
-                android:gravity="center"
-                android:minWidth="100dp"
-                style="@style/editStyle2"
                 android:focusable="false"
                 />
+
         </LinearLayout>
-
-
 
     </LinearLayout>
 
