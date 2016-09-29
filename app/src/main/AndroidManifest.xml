@@ -91,6 +91,12 @@
 
         </activity>
 
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.CreatePriceCheckActivity"
+            android:label= "Перевірка цін">
+
+        </activity>
+
+
 
         <meta-data
             android:name="com.google.android.gms.version"

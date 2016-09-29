@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
     TextView editExpenseInvoice;
     TextView editInventory;
     TextView editPriceCheck;
+    TextView createInventory;
+    TextView createPriceCheck;
     ImageView exportInvoice;
     ImageView exportInventory;
     ImageView exportPriceCheck;
@@ -73,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
         exportInvoice = (ImageView) findViewById(R.id.button_export_invoice);
         exportInventory = (ImageView) findViewById(R.id.button_export_inventory);
         exportPriceCheck = (ImageView) findViewById(R.id.button_export_price_check);
+        createInventory = (TextView) findViewById(R.id.edit_inventory);
+        createPriceCheck = (TextView) findViewById(R.id.create_price_check);
         initEditClickListeners();
     }
 
@@ -113,6 +117,21 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
 
                 ImportFile importFile = new ImportFile(context, urlAddressDownloadFile,urlInputFile);
                 importFile.execute();
+            }
+        });
+        createInventory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), InventoryEditActivity.class);
+                startActivity(intent);
+
+            }
+        });
+        createPriceCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CreatePriceCheckActivity.class);
+                startActivity(intent);
             }
         });
 

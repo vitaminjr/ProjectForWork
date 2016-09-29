@@ -154,6 +154,7 @@
                             android:padding="10dp"
                             android:layout_weight="1"
                             android:textColor="#FF21509B"
+                            style="@style/button_styles_main_activity"
                             />
                         <TextView
                             android:layout_width="match_parent"
@@ -234,6 +235,7 @@
                             android:layout_weight="1"
                             android:padding="10dp"
                             android:textColor="#FF21509B"
+                            style="@style/button_styles_main_activity"
                             />
                         <TextView
                             android:layout_width="match_parent"
