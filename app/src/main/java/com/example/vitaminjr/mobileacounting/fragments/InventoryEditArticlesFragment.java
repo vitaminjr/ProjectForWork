@@ -34,6 +34,7 @@ import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.Article;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
@@ -156,6 +157,14 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
 
         textNumberInvoice.setText(invoiceNumber.toString());
 
+        SharedPreferences preferencesKeyBoard = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if(preferencesKeyBoard.getBoolean("show_keyboard",false) == false){
+            SetHideNotKeyboard hideBarcode = new SetHideNotKeyboard(getActivity(),editTextBarcodeInventory);
+            SetHideNotKeyboard hideCount = new SetHideNotKeyboard(getActivity(),textViewFactCountArticle);
+            editTextBarcodeInventory.setOnTouchListener(hideBarcode);
+            textViewFactCountArticle.setOnTouchListener(hideCount);
+        }
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         if (created == CreateType.device.ordinal() || preferences.getBoolean("count",false) == false) {
             view.findViewById(R.id.layout_planned_count).setVisibility(View.GONE);
@@ -196,7 +205,7 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
                             editTextCountArticle.setText(String.valueOf(resultTmp.getQuantity()));
                             inventoryAction.setQuantity(Float.parseFloat(String.valueOf(resultTmp.getQuantity())));
                         }
-                        else
+                        else if(inventoryAction.getArticleId()!=0)
                         {
                             editTextCountArticle.setText(String.valueOf(resultTmp.getQuantity()));
                             inventoryAction.setQuantity(Float.parseFloat(String.valueOf(resultTmp.getQuantity())));
@@ -218,12 +227,7 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
                             editTextCountArticle.selectAll();
                         }
                     }
-                    if(created == CreateType.pc.ordinal() && inventoryAction.getArticleId() != 0){
-                        float quantity = SqlQuery.getInventoryRowsQuantity(getContext(),idInventory,inventoryAction.getArticleId());
-                        textViewPlannedCount.setText(String.format("%.3f",quantity));
-                    }
-                    float factCount =  SqlQuery.getInventoryActionQuantity(getContext(),idInventory,inventoryAction.getArticleId());
-                    textViewFactCountArticle.setText(String.format("%.3f",factCount));
+
                     return true;
                 }
                 markSave = true;
@@ -300,10 +304,19 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
         if (corType == CorrectionType.ctInsert.ordinal() || corType == CorrectionType.ctNone.ordinal()) {
             inventoryAction.setQuantity((float) 1.000);
             editTextCountArticle.setText(String.valueOf(inventoryAction.getQuantity()));
+            if(inventoryAction.getBarcode() != null)
+                editTextBarcodeInventory.setText(inventoryAction.getBarcode().toString());
+
         }
         if(corType == CorrectionType.ctUpdate.ordinal()){
             try {
                 editTextBarcodeInventory.setText(inventoryAction.getBarcode().toString());
+                if(created == CreateType.pc.ordinal() && inventoryAction.getArticleId() != 0){
+                    float quantity = SqlQuery.getInventoryRowsQuantity(getContext(),idInventory,inventoryAction.getArticleId());
+                    textViewPlannedCount.setText(String.format("%.3f",quantity));
+                }
+                float factCount =  SqlQuery.getInventoryActionQuantity(getContext(),idInventory,inventoryAction.getArticleId());
+                textViewFactCountArticle.setText(String.format("%.3f",factCount));
             }catch (NullPointerException ex){}
         }
 
@@ -317,12 +330,9 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        item.setVisible(false);
-
         if (item.getItemId() == android.R.id.home) {
             if (inventoryAction.getArticleId() != 0) {
                 onCreateDialog();
-                getActivity().getSupportFragmentManager().popBackStack();
             } else {
                 getActivity().getSupportFragmentManager().popBackStack();
                 getActivity().finish();

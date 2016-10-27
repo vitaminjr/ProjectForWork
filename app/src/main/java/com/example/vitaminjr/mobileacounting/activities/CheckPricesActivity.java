@@ -1,5 +1,6 @@
 package com.example.vitaminjr.mobileacounting.activities;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
@@ -103,10 +104,11 @@ public class CheckPricesActivity extends AppCompatActivity {
                             case EXPORT :
                                 try {
                                     SqlQuery.exportPriceCheck(getApplicationContext());
-                                    Toast.makeText(getApplicationContext(),"Успішно", Toast.LENGTH_SHORT).show();
+                                    SqlQuery.exportPriceCheckTovars(getApplicationContext());
+                                    Toast.makeText(getApplicationContext(),R.string.successfully, Toast.LENGTH_SHORT).show();
                                 }
                                 catch (Exception ex){
-                                    Toast.makeText(getApplicationContext(),"Помилка Експорту", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(),R.string.error_export, Toast.LENGTH_SHORT).show();
                                 }
                                 break;
                         }

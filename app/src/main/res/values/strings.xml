@@ -6,7 +6,7 @@
   <string name="action_finish">Кінець</string>
   <string name="coming">Прихід/Видатки</string>
   <string name="check_prices">Перевірка цін</string>
-  <string name="inventory">Інвертирезація</string>
+  <string name="inventory">Інвентаризація</string>
 
   <string name="expense">Видаткова накладна</string>
   <string name="clean">Очистка</string>
@@ -19,6 +19,7 @@
   <string name="revision_list">Перегляд списку</string>
 
   <string name="provider">Постачальник: </string>
+  <string name="customer">Покупець: </string>
   <string name="choice">Обрати</string>
   <string name="date">Дата</string>
   <string name="name">Назва </string>
@@ -35,6 +36,28 @@
   <string name="action_previous">Попередній</string>
   <string name="subdivision">Підрозділ</string>
   <string name="fact">Факт</string>
+  <string name="tovars">Товари</string>
+  <string name="edit_tovars">Товари</string>
+  <string name="list_tovars">Список товарів</string>
+  <string name="settings">Налаштування</string>
+  <string name="successfully">Успішно</string>
+  <string name="error_export">Помилка Експорту</string>
+  <string name="export_successfully">Екcпортовано Успішно!!!</string>
+  <string name="unloading">Вивантаження</string>
+  <string name="loading">Завантаження</string>
+  <string name="updated">Оновлено</string>
+  <string name="saved">Збережено</string>
+  <string name="created">створено</string>
+  <string name="warning">Попередження</string>
+  <string name="register">Зареєструвати</string>
+  <string name="unregister_version">Демонстраційна версія</string>
+  <string name="exit">Вихід</string>
+  <string name="key">Ключ</string>
+  <string name="code_register">Код Реєстрації</string>
+
+
+
+
 
 
 

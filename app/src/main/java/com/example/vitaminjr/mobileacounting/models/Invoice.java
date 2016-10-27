@@ -1,9 +1,12 @@
 package com.example.vitaminjr.mobileacounting.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by vitaminjr on 13.07.16.
  */
-public class Invoice {
+public class Invoice implements Parcelable {
 
     private String numberInvoice;
     private String nameProvider;
@@ -27,6 +30,29 @@ public class Invoice {
         created = 0;
     }
 
+
+    protected Invoice(Parcel in) {
+        invoiceId = in.readInt();
+        numberInvoice = in.readString();
+        nameProvider = in.readString();
+        codeEDRPOU = in.readString();
+        dateCreateInvoice = in.readString();
+        providerId = in.readInt();
+        invoiceTypeId = in.readInt();
+        created = in.readInt();
+    }
+
+    public static final Creator<Invoice> CREATOR = new Creator<Invoice>() {
+        @Override
+        public Invoice createFromParcel(Parcel in) {
+            return new Invoice(in);
+        }
+
+        @Override
+        public Invoice[] newArray(int size) {
+            return new Invoice[size];
+        }
+    };
 
     public String getInvoiceCode() {
         return invoiceCode;
@@ -101,4 +127,22 @@ public class Invoice {
     public void setDateCreateInvoice(String dateCreateInvoice) {
         this.dateCreateInvoice = dateCreateInvoice;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(invoiceId);
+        dest.writeString(numberInvoice);
+        dest.writeString(nameProvider);
+        dest.writeString(codeEDRPOU);
+        dest.writeString(dateCreateInvoice);
+        dest.writeInt(providerId);
+        dest.writeInt(invoiceTypeId);
+        dest.writeInt(created);
+    }
+
 }

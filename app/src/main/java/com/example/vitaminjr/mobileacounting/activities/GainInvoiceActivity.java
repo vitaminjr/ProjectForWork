@@ -7,18 +7,16 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FilterQueryProvider;
+import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewAdapter;
@@ -52,7 +50,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
     }
 
     public void initGui() {
-
         toolbar = (Toolbar) findViewById(R.id.toolbar_gain);
         setSupportActionBar(toolbar);
         initDrawer(toolbar);
@@ -83,10 +80,16 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
                                     initEditActivity();
                                     break;
                                 case EXPORT:
-                                    SqlQuery.exportInvoices(getApplicationContext());
-                                    SqlQuery.exportInvoicesRows(getApplicationContext());
-                                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
-                                    SqlQuery.exportInvoiceProviders(getApplicationContext());
+                                    try {
+                                        SqlQuery.exportInvoices(getApplicationContext());
+                                        SqlQuery.exportInvoicesRows(getApplicationContext());
+                                        SqlQuery.exportInvoicesRowTovars(getApplicationContext());
+                                        SqlQuery.exportInvoiceProviders(getApplicationContext());
+                                        Toast.makeText(getApplicationContext(),R.string.export_successfully,Toast.LENGTH_SHORT).show();
+                                    }catch (Exception ex){
+                                        Toast.makeText(getApplicationContext(),R.string.error_export,Toast.LENGTH_SHORT).show();
+                                    }
+
                                     break;
                             }
                         }
@@ -105,7 +108,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
     }
 
     public void initEditActivity() {
-
         Intent intent = new Intent(getApplicationContext(), GainInvoiceEditActivity.class);
         intent.putExtra("type", InvoiceType.profit.ordinal());
         startActivity(intent);
@@ -114,15 +116,9 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search, menu);
-
         MenuItem searchItem = menu.findItem(R.id.action_search);
-
         searchView = (SearchView) searchItem.getActionView();
-
-
-
         setSearchView();
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -134,10 +130,10 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
         if (str == null  ||  str.length () == 0)  {
-            mCursor = SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.profit.ordinal());
+            mCursor = SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.profit.ordinal());
         }
         else {
-            mCursor = SqlQuery.searchInvoice(this, str);
+            mCursor = SqlQuery.searchInvoice(this, str, InvoiceType.profit.ordinal());
 
             if (mCursor != null) {
                 mCursor.moveToFirst();
@@ -186,8 +182,7 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
-                    gainInvoiceFragment.adapter.getFilter().filter(checkFilter(newText,searchView));
+                gainInvoiceFragment.adapter.getFilter().filter(checkFilter(newText,searchView));
                 gainInvoiceFragment.adapter.notifyDataSetChanged();
                 return true;
             }
@@ -197,7 +192,7 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewAdapter.setCursor(SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.profit.ordinal()));
+                    listViewAdapter.setCursor(SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.profit.ordinal()));
             }
         });
     }

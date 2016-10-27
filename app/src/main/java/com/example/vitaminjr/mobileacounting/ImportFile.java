@@ -86,6 +86,7 @@ public class ImportFile extends AsyncTask<Void,Integer,Boolean> {
 
             SmbFile localAuditPCFile = new SmbFile(urlAddress);
 
+
             InputStream in = localAuditPCFile.getInputStream();
 
             OutputStream out = new FileOutputStream(fileAddress);

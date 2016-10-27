@@ -33,6 +33,8 @@ public class ListArticlesInventoryActivity extends AppCompatActivity implements 
     ListViewArticlesAdapter listViewArticlesAdapter;
     long idInventory;
     MenuItem searchItem;
+    int created;
+    String numberInvoice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,8 +45,8 @@ public class ListArticlesInventoryActivity extends AppCompatActivity implements 
 
         Intent getArticleInvoiceIntent = getIntent();
         idInventory =  getArticleInvoiceIntent.getLongExtra(InventoryEditActivity.ID_INVENTORY,0);
-        int created = getArticleInvoiceIntent.getIntExtra(InventoryEditActivity.CREATED,-1);
-        String numberInvoice = getArticleInvoiceIntent.getStringExtra(InventoryEditActivity.NUMBER);
+        created = getArticleInvoiceIntent.getIntExtra(InventoryEditActivity.CREATED,-1);
+        numberInvoice = getArticleInvoiceIntent.getStringExtra(InventoryEditActivity.NUMBER);
 
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -81,12 +83,8 @@ public class ListArticlesInventoryActivity extends AppCompatActivity implements 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search, menu);
         searchItem = menu.findItem(R.id.action_search);
-
-
         searchView = (SearchView) searchItem.getActionView();
-
         setSearchView();
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -148,7 +146,9 @@ public class ListArticlesInventoryActivity extends AppCompatActivity implements 
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewArticlesAdapter.setCursor(SqlQuery.getListInventoryAction(getApplicationContext(), idInventory));
+                    listViewArticlesAdapter = new ListViewArticlesAdapter(getApplicationContext(),SqlQuery.getListInventoryAction(getApplicationContext(), idInventory),true);
+                    //listViewArticlesAdapter.setCursor(SqlQuery.getListInventoryAction(getApplicationContext(), idInventory));
+                    listViewArticlesAdapter.notifyDataSetChanged();
             }
         });
 
@@ -165,5 +165,14 @@ public class ListArticlesInventoryActivity extends AppCompatActivity implements 
                 search.setQuery(s, false);
             }
         return s;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        ListArticlesInventoryFragment listArticlesInventoryFragment = ListArticlesInventoryFragment.newInstance(numberInvoice,idInventory,created);
+        fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInventoryFragment);
+        fragmentTransaction.commit();
     }
 }

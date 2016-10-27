@@ -1,6 +1,7 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,9 +19,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
+import com.example.vitaminjr.mobileacounting.activities.InventoryEditArticlesItem;
+import com.example.vitaminjr.mobileacounting.activities.InvoiceEditArticlesItem;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewArticlesAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
+import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
 import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListenerArticles;
 
@@ -86,11 +90,20 @@ public class ListArticlesInvoiceFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction().addToBackStack(null);
+                Intent intent = new Intent(getContext(), InvoiceEditArticlesItem.class);
+                intent.putExtra("numberInvoice",numberInvoice);
+                intent.putExtra("invoiceId",invoiceId);
+                intent.putExtra("created",created);
+                intent.putExtra("position",position);
+                intent.putExtra("corrType",correctionType);
+                startActivity(intent);
+
+
+/*                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction().addToBackStack(null);
                 GainInvoiceEditArticlesFragment editFragment = GainInvoiceEditArticlesFragment.newInstance(numberInvoice, correctionType,invoiceId, position,created);
                 fragmentTransaction.replace(R.id.article_invoice_container, editFragment);
                 fragmentTransaction.commit();
-                getActivity().findViewById(R.id.layout_header).setVisibility(View.GONE);
+                getActivity().findViewById(R.id.layout_header).setVisibility(View.GONE);*/
 
             }
         });
@@ -141,6 +154,10 @@ public class ListArticlesInvoiceFragment extends Fragment {
     public void initAdapter(){
         adapter = new ListViewArticlesAdapter(getContext(), SqlQuery.getListArticle(getContext(),invoiceId),true);
         listView.setAdapter(adapter);
+        if(created == CreateType.pc.ordinal())
+        {
+            adapter.setToggle(true);
+        }
     }
 
 }

@@ -1,7 +1,9 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
@@ -77,6 +80,16 @@ public class CheckPricesEditFragment extends Fragment {
         textViewUnitName = (TextView) view.findViewById(R.id.text_name_article);
         textViewNameArticle = (TextView) view.findViewById(R.id.text_unit_article);
         editTextBarcode.requestFocus();
+
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if(preferences.getBoolean("show_keyboard",false) == false){
+            SetHideNotKeyboard hideBarcode = new SetHideNotKeyboard(getActivity(),editTextBarcode);
+            SetHideNotKeyboard hideCount = new SetHideNotKeyboard(getActivity(),editTextPriceTag);
+            editTextBarcode.setOnTouchListener(hideBarcode);
+            editTextPriceTag.setOnTouchListener(hideCount);
+        }
+
         editTextBarcodeArticleAction(true,true,true);
         editTextPriceTagArticleAction(false,false,false);
     }
@@ -115,6 +128,7 @@ public class CheckPricesEditFragment extends Fragment {
                             editTextBarcodeArticleAction(false,false,false);
                             editTextPriceTagArticleAction(true,true,true);
                             editTextPriceTag.requestFocus();
+                            editTextPriceTag.selectAll();
                         }
                     }
                     return true;

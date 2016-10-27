@@ -1,63 +1,66 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
+import com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditArticlesActivity;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
+import com.example.vitaminjr.mobileacounting.interfaces.GetFragementListener;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
+import com.example.vitaminjr.mobileacounting.interfaces.OnEventListener;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Created by vitaminjr on 19.07.16.
  */
-public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBackPressedListener{
+public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBackPressedListener {
 
     private String invoiceNumber;
     private int correctionType;
     private int idInvoice;
     private int positionArticle;
     private int created;
-    private float countCopy;
-
-    boolean priceDevice = false;
-    boolean countPc = false;
-    boolean markSave = false;
+    private int corrTypeStart;
 
     private final int pcType = 0;
     private final int deviceType = 1;
     List<BarcodeTamplateInfo> listTemplate;
 
+
     InvoiceRow invoiceRow;
     InvoiceRow article;
+    InvoiceRow invoiceRowCopy;
 
-    Button buttonCountPlus;
-    Button buttonCountMinus;
+    Button buttonCountIncrement;
+    Button buttonCountDecrement;
     TextView textNumberInvoice;
     TextView textNameArticle;
     TextView textUnitArticle;
@@ -66,6 +69,8 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     EditText editTextPriceArticle;
     TextView textViewSumaArticle;
     TextView textViewPlannedCount;
+    boolean cancelButton = false;
+    public boolean isOnCreateDialog = false;
 
     public static GainInvoiceEditArticlesFragment newInstance(String invoiceNumber, int typeFragment, int idInvoice, int created){
 
@@ -89,6 +94,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         this.correctionType = typeFragment;
         this.idInvoice = idInvoice;
         this.created = created;
+
     }
 
     public GainInvoiceEditArticlesFragment(String number, int typeFragment, int idInvoice, int position, int created)
@@ -102,10 +108,11 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         this.created = created;
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        invoiceRowCopy = new InvoiceRow();
+        Log.d("Log", "onCreate");
     }
 
     @Nullable
@@ -113,22 +120,91 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view =  inflater.inflate(R.layout.fragment_edit_articles_invoice,container,false);
+        isOnCreateDialog = false;
         initGui(view);
 
         listTemplate = SqlQuery.getBarcodeTemplates(getContext());
-
-        if(correctionType == CorrectionType.ctUpdate.ordinal() ||
-                correctionType == CorrectionType.ctCollate.ordinal())
+        corrTypeStart = correctionType;
+        if((correctionType == CorrectionType.ctUpdate.ordinal()
+                && created == CreateType.device.ordinal()) ||
+                correctionType == CorrectionType.ctCollate.ordinal()) {
             ShowListInvoice();
+            stateElements(false,true,false,true,true);
+            editTextCountArticle.selectAll();
+        }else
+            stateElements(true,false,false,false,false);
 
         Listeners();
+        Log.d("Log", "onCreateView");
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("Log", "onResume");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("Log", "onStart");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            cancelButton = true;
+            if(invoiceRow.getArticleId() == 0){
+                if(!editTextBarcodeInvoice.getText().toString().equals("")){
+                    saveInvoiceRow();
+                    getActivity().finish();
+                }
+            }else
+            if(invoiceRow.getQuantityAccount() != invoiceRowCopy.getQuantityAccount()
+                    || invoiceRow.getPriceAccount() != Float.parseFloat(editTextPriceArticle.getText().toString()) ) {
+                if(created == CreateType.pc.ordinal()){
+                    updateInvoiceRowWithCondition();
+                }else {
+                    saveInvoiceRow();
+                    getActivity().finish();
+                }
+            }
+            else
+                getActivity().finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        cancelButton = true;
+        if(invoiceRow.getArticleId() == 0){
+            if(!editTextBarcodeInvoice.getText().toString().equals("")){
+                saveInvoiceRow();
+                getActivity().finish();
+            } else
+                getActivity().finish();
+        }else
+        if(invoiceRow.getQuantityAccount() != invoiceRowCopy.getQuantityAccount()
+                || invoiceRow.getPriceAccount() != Float.parseFloat(editTextPriceArticle.getText().toString()) ) {
+            if(created == CreateType.pc.ordinal()){
+                updateInvoiceRowWithCondition();
+            }else {
+                saveInvoiceRow();
+                getActivity().finish();
+            }
+        }
+        else
+            getActivity().finish();
+
     }
 
     public void initGui(View view){
 
-        buttonCountPlus = (Button) view.findViewById(R.id.button_count_plus);
-        buttonCountMinus = (Button) view.findViewById(R.id.button_count_minus);
+        buttonCountIncrement = (Button) view.findViewById(R.id.button_count_plus);
+        buttonCountDecrement = (Button) view.findViewById(R.id.button_count_minus);
         textNumberInvoice = (TextView) view.findViewById(R.id.text_number_invoice);
         textNameArticle = (TextView) view.findViewById(R.id.text_name_article);
         textUnitArticle = (TextView) view.findViewById(R.id.text_unit_article);
@@ -138,38 +214,23 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         textViewSumaArticle = (TextView) view.findViewById(R.id.text_view_suma_article);
         textViewPlannedCount = (TextView) view.findViewById(R.id.planned_count);
 
-        if (created == CreateType.device.ordinal()){
-            view.findViewById(R.id.layout_planned_count).setVisibility(View.GONE);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if(preferences.getBoolean("show_keyboard",false) == false){
+        SetHideNotKeyboard hideBarcode = new SetHideNotKeyboard(getActivity(),editTextBarcodeInvoice);
+        SetHideNotKeyboard hideCount = new SetHideNotKeyboard(getActivity(),editTextCountArticle);
+        editTextBarcodeInvoice.setOnTouchListener(hideBarcode);
+        editTextCountArticle.setOnTouchListener(hideCount);
         }
 
-        if(correctionType == CorrectionType.ctInsert.ordinal() || correctionType == CorrectionType.ctUpdate.ordinal()){
-            editTextCountArticleAction(false,false,false);
-            buttonCountPlusAction(false,false,false);
-            buttonCountMinusAction(false,false,false);
-            editTextPriceArticleAction(false,false,false);
-            editTextBarcodeInvoiceAction(true,true,true);
-        }
 
-        if(created == CreateType.pc.ordinal())
-            editTextPriceArticleAction(false,false,false);
+
 
         textNumberInvoice.setText(String.valueOf(invoiceNumber));
 
-        if(created == CreateType.pc.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
-        {
-            editTextBarcodeInvoiceAction(false,false,false);
-            editTextCountArticleAction(true,true,true);
-            editTextCountArticle.requestFocus();
+        if (created == CreateType.device.ordinal()){
+            view.findViewById(R.id.layout_planned_count).setVisibility(View.GONE);
         }
-
-        if(created == CreateType.device.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
-        {
-            editTextBarcodeInvoiceAction(false,false,false);
-            editTextPriceArticleAction(false,false,false);
-            editTextCountArticleAction(true,true,true);
-            editTextCountArticle.requestFocus();
-        }
-
     }
 
     public void Listeners() {
@@ -229,41 +290,27 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                             switch (created) {
 
                                 case deviceType:
-
                                     if (invoiceRow.getInvoiceRowId() != 0) {
-
                                         correctionType = CorrectionType.ctUpdate.ordinal();
-                                        editTextBarcodeInvoiceAction(false,false,false);
-                                        editTextPriceArticleAction(false,false,false);
-                                        buttonCountPlusAction(true,false,false);
-                                        buttonCountMinusAction(true,false,false);
-                                        editTextCountArticleAction(true,true,true);
+                                        stateElements(false,true,false,true,true);
                                         editTextCountArticle.requestFocus();
-
-                                    }
-                                    else {
+                                    } else {
                                         invoiceRow = article;
-                                        editTextBarcodeInvoiceAction(false,false,false);
-                                        editTextPriceArticleAction(false,false,false);
-                                        editTextCountArticleAction(true,true,true);
-                                        buttonCountPlusAction(true,false,false);
-                                        buttonCountMinusAction(true,false,false);
+                                        stateElements(false,true,false,true,true);
                                         editTextCountArticle.requestFocus();
-
                                     }
                                     showArticles(invoiceRow, correctionType);
-
                                     break;
+
                                 case pcType:
                                     if (invoiceRow.getInvoiceRowId() != 0) {
-                                        correctionType = CorrectionType.ctUpdate.ordinal();
+
+                                        invoiceRow.setBarcode(article.getBarcode());
                                         showArticles(invoiceRow, correctionType);
                                         textViewPlannedCount.setText(String.valueOf(invoiceRow.getQuantity()));
-                                        editTextBarcodeInvoiceAction(false,false,false);
-                                        editTextCountArticleAction(true,true,true);
-                                        buttonCountPlusAction(true,false,false);
-                                        buttonCountMinusAction(true,false,false);
+                                        stateElements(false,true,false,true,true);
                                         editTextCountArticle.requestFocus();
+                                        editTextCountArticle.selectAll();
                                     }
                                     else {
                                         Toast.makeText(getContext(), "Товар " + article.getName()
@@ -275,9 +322,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                             }
                         }
                     }
+                    editTextCountArticle.selectAll();
                     return true;
                 }
-                markSave = true;
                 return false;
             }
         });
@@ -285,83 +332,63 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         editTextCountArticle.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     try {
                         invoiceRow.setQuantityAccount(Float.parseFloat(String.valueOf(editTextCountArticle.getText())));
+
+                        float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
+                        invoiceRow.setSumaAccount(suma);
+                        textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
+
+                        if(created == CreateType.pc.ordinal()) {
+                            updateInvoiceRowWithCondition();
+                        }
+
+                        if(created == CreateType.device.ordinal()){
+                            stateElements(false,false,true,false,false);
+                            editTextPriceArticle.requestFocus();
+                        }
                     }
                     catch (NumberFormatException ex){
                         Toast.makeText(getContext(),"Невірна кількість",Toast.LENGTH_SHORT).show();
                     }
-
-                    float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
-                    invoiceRow.setSumaAccount(suma);
-                    textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
-                    if(created == CreateType.pc.ordinal() && correctionType == CorrectionType.ctUpdate.ordinal()){
-                        countPc = true;
-                    }
-
-                    updateInvoiceRowWithCondition();
-
-                    if(created == CreateType.device.ordinal()){
-
-                        editTextCountArticleAction(false,false,false);
-                        buttonCountPlusAction(false,false,false);
-                        buttonCountMinusAction(false,false,false);
-                        editTextPriceArticleAction(true,true,true);
-                        editTextPriceArticle.requestFocus();
-                    }
-
+                    return true;
+                }
+                if((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_UP)){
+                    countIncrement();
+                    return true;
+                }
+                if((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_DOWN)){
+                    countDecrement();
                     return true;
                 }
                 return false;
             }
         });
 
-        buttonCountPlus.setOnClickListener(new View.OnClickListener() {
+        buttonCountIncrement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                editTextCountArticle.requestFocus();
-                float countPlusPlus = Float.parseFloat(String.valueOf(editTextCountArticle.getText()));
-                countPlusPlus++;
-                invoiceRow.setQuantityAccount(countPlusPlus);
-                editTextCountArticle.setText(String.format("%.3f",countPlusPlus).replace(',', '.'));
-
-                float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
-                invoiceRow.setSumaAccount(suma);
-                textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
-
-                //updateInvoiceRowWithCondition();
-
+                countIncrement();
             }
         });
 
-        buttonCountMinus.setOnClickListener(new View.OnClickListener() {
+        buttonCountDecrement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if((Float.parseFloat(String.valueOf(editTextCountArticle.getText())))>=1) {
-
-                    float countMinusMinus = Float.parseFloat(String.valueOf(editTextCountArticle.getText()));
-                    countMinusMinus--;
-                    invoiceRow.setQuantityAccount(countMinusMinus);
-                    editTextCountArticle.setText(String.format("%.3f",countMinusMinus).replace(',', '.'));
-
-                    float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
-                    invoiceRow.setSumaAccount(suma);
-                    textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
-
-                    //updateInvoiceRowWithCondition();
-
-                }
-
+                countDecrement();
             }
         });
+
 
         editTextPriceArticle.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
 
@@ -371,61 +398,41 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                     invoiceRow.setSumaAccount(suma);
                     textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
 
+                    saveInvoiceRow();
 
-                    priceDevice = true;
-                    addOrUpdateInvoiceRows(correctionType);
-                    if((created == CreateType.device.ordinal())
-                            && (correctionType == CorrectionType.ctInsert.ordinal())
-                            || (correctionType == CorrectionType.ctUpdate.ordinal())){
-                        editTextPriceArticleAction(false,false,false);
-                        editTextBarcodeInvoiceAction(true,true,true);
+                    if(invoiceRow.getInvoiceRowId() == 0){
+                        clearTextView();
+                        invoiceRow.clear();
+                        article.clear();
+                        stateElements(true,false,false,false,false);
+                        editTextBarcodeInvoice.requestFocus();
+                    }else if(corrTypeStart == CorrectionType.ctUpdate.ordinal()) {
+                        stateElements(false,true,false,true,true);
+                        editTextCountArticle.requestFocus();
+                    }else {
+                        clearTextView();
+                        invoiceRow.clear();
+                        article.clear();
+                        stateElements(true,false,false,false,false);
                         editTextBarcodeInvoice.requestFocus();
                     }
-                    if(correctionType == CorrectionType.ctCollate.ordinal())
-                    {
-                        editTextPriceArticleAction(false,false,false);
-                        editTextCountArticleAction(true,true,true);
-                        editTextCountArticle.requestFocus();
-
-                    }
-
                     return true;
                 }
                 return false;
             }
         });
-
-
-        editTextPriceArticle.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(editTextPriceArticle.getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-                return true;
-            }
-        });
-
-    }
-
-    public void clearTextView(){
-        textNameArticle.setText("");
-        editTextCountArticle.setText("");
-        editTextPriceArticle.setText("");
-        textUnitArticle.setText("");
-        editTextBarcodeInvoice.setText("");
-        textViewSumaArticle.setText("");
-        textViewPlannedCount.setText("");
-
     }
 
     public void ShowListInvoice()
     {
-
         Cursor c =  SqlQuery.getListArticle(getContext(),idInvoice);
         invoiceRow = SqlQuery.getArticleFromPosition(c, positionArticle);
-        showArticles(invoiceRow, correctionType);
+        invoiceRow.setInvoiceId(idInvoice);
+        invoiceRowCopy.setQuantityAccount(invoiceRow.getQuantityAccount());
+        invoiceRowCopy.setPriceAccount(invoiceRow.getPriceAccount());
+        invoiceRowCopy.setInvoiceId(idInvoice);
 
+        showArticles(invoiceRow, correctionType);
     }
 
     public void showArticles(InvoiceRow invoiceRow, int corType) {
@@ -437,34 +444,27 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
             float suma = invoiceRow.getPrice() * invoiceRow.getQuantity();
             invoiceRow.setPriceAccount(invoiceRow.getPrice());
             invoiceRow.setSumaAccount(suma);
-
-
         }
 
-        if(created == CreateType.pc.ordinal())
-        {
-            textViewPlannedCount.setText(String.format("%.3f", invoiceRow.getQuantity()).replace(",","."));
+        if(created == CreateType.pc.ordinal()) {
+            textViewPlannedCount.setText(String.format("%.3f", invoiceRow.getQuantity()).replace(",", "."));
+            invoiceRow.setPriceAccount(invoiceRow.getPrice());
         }
-
+        editTextPriceArticle.setText(String.format("%.2f",invoiceRow.getPriceAccount()).replace(",","."));
         editTextCountArticle.setText(String.format("%.3f", invoiceRow.getQuantityAccount()).replace(",","."));
+        textViewSumaArticle.setText(String.format("%.2f",invoiceRow.getSumaAccount()).replace(",","."));
+
         editTextBarcodeInvoice.setText(invoiceRow.getBarcode());
         textNameArticle.setText(invoiceRow.getName());
-
-            editTextPriceArticle.setText(String.format("%.2f",invoiceRow.getPriceAccount()).replace(",","."));
-            textViewSumaArticle.setText(String.format("%.2f",invoiceRow.getSumaAccount()).replace(",","."));
-
         textUnitArticle.setText(invoiceRow.getUnitName());
-        countCopy = invoiceRow.getQuantityAccount();
+
     }
 
-    public void addOrUpdateInvoiceRows(int correctionType){
-
-
+    public void saveInvoiceRow(){
         invoiceRow.setCorrectionTypeId(correctionType);
+        invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
         invoiceRow.setPriceAccount(Float.parseFloat(String.valueOf(editTextPriceArticle.getText())));
-        invoiceRow.setQuantityAccount(Float.parseFloat(String.valueOf(editTextCountArticle.getText())));
         invoiceRow.setSumaAccount(invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount());
-
 
         if (correctionType == CorrectionType.ctInsert.ordinal())
         {
@@ -473,45 +473,131 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
             invoiceRow.setSuma(invoiceRow.getSumaAccount());
             invoiceRow.setInvoiceId(idInvoice);
             SqlQuery.insertInvoiceRow(invoiceRow, getContext());
-            clearTextView();
-            Toast.makeText(getContext(),"Збережено",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),R.string.saved,Toast.LENGTH_SHORT).show();
         }
         else
         {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
             String strDate = simpleDateFormat.format(new Date());
             invoiceRow.setDateTimeChange(strDate);
             SqlQuery.updateInvoiceRow(invoiceRow, getContext());
-            Toast.makeText(getContext(),"Оновлено",Toast.LENGTH_SHORT).show();
-
-            if(created == CreateType.pc.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
-            {
-                editTextCountArticleAction(true,true,true);
-                editTextCountArticle.requestFocus();
-            }
-            else if(priceDevice == true
-                    && (correctionType ==  CorrectionType.ctInsert.ordinal()
-                    ||  correctionType == CorrectionType.ctUpdate.ordinal())) {
-                clearTextView();
-                invoiceRow.clear();
-                article.clear();
-                priceDevice = false;
-            }
+            Toast.makeText(getContext(),R.string.updated,Toast.LENGTH_SHORT).show();
         }
-
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public void updateInvoiceRowWithCondition(){
 
-        if (item.getItemId() == android.R.id.home) {
+        if(isArticlePager() == true){
+            try {
+                invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+                invoiceRow.setSumaAccount(invoiceRow.getQuantityAccount()*invoiceRow.getPriceAccount());
+            }catch (Exception ex){
+                Toast.makeText(getContext(),"невірна кількість",Toast.LENGTH_SHORT).show();
+            }
 
-            saveInvoiceRows();
+            if(invoiceRow.getQuantityAccount() != invoiceRowCopy.getQuantityAccount()
+                    || invoiceRow.getPriceAccount() != Float.parseFloat(editTextPriceArticle.getText().toString()) ) {
+                if(invoiceRow.getQuantityAccount() > invoiceRow.getQuantity() ) {
+                    isOnCreateDialog = true;
+                    onCreateDialog();
+                }
+                else {
+                    saveInvoiceRow();
+                    clearForm();
+                    if(cancelButton == true)
+                        getActivity().finish();
+                }
+            }
+        }else {
 
-            getActivity().getSupportFragmentManager().popBackStack();
+            if (invoiceRow.getQuantityAccount() > invoiceRow.getQuantity()) {
+                isOnCreateDialog = true;
+                onCreateDialog();
+            } else {
+                saveInvoiceRow();
+                clearForm();
+                if (cancelButton == true)
+                    getActivity().finish();
+            }
         }
-        return super.onOptionsItemSelected(item);
     }
+
+    public void onCreateDialog(){
+        final String title = "Попередження";
+        String message = "Фактична кількість перевищує планову. Зберегти? ";
+        String button1String = "Ні";
+        String button2String = "Так";
+
+        final AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
+        ad.setTitle(title);
+        ad.setMessage(message);
+
+        ad.setNegativeButton(button1String, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                transitionViewPager();
+            }
+        });
+        ad.setPositiveButton(button2String, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                saveInvoiceRow();
+                if(cancelButton == true)
+                    getActivity().finish();
+                clearForm();
+                transitionViewPager();
+            }
+        });
+        ad.setCancelable(false);
+        ad.show();
+    }
+
+    public void countIncrement(){
+        editTextCountArticle.requestFocus();
+        float countPlusPlus = Float.parseFloat(String.valueOf(editTextCountArticle.getText()));
+        countPlusPlus++;
+        invoiceRow.setQuantityAccount(countPlusPlus);
+        editTextCountArticle.setText(String.format("%.3f",countPlusPlus).replace(',', '.'));
+
+        float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
+        invoiceRow.setSumaAccount(suma);
+        textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
+        editTextCountArticle.selectAll();
+    }
+
+    public void countDecrement(){
+        if((Float.parseFloat(String.valueOf(editTextCountArticle.getText())))>=1) {
+
+            float countMinusMinus = Float.parseFloat(String.valueOf(editTextCountArticle.getText()));
+            countMinusMinus--;
+            invoiceRow.setQuantityAccount(countMinusMinus);
+            editTextCountArticle.setText(String.format("%.3f",countMinusMinus).replace(',', '.'));
+
+            float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
+            invoiceRow.setSumaAccount(suma);
+            textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
+            editTextCountArticle.selectAll();
+        }
+    }
+
+    public void clearTextView(){
+        textNameArticle.setText("");
+        editTextCountArticle.setText("");
+        editTextPriceArticle.setText("");
+        textUnitArticle.setText("");
+        editTextBarcodeInvoice.setText("");
+        textViewSumaArticle.setText("");
+        textViewPlannedCount.setText("");
+    }
+
+    public void clearForm(){
+        if(correctionType == CorrectionType.ctUpdate.ordinal()) {
+            clearTextView();
+            stateElements(true,false,false,false,false);
+            editTextBarcodeInvoice.requestFocus();
+            invoiceRow.clear();
+            invoiceRowCopy.clear();
+        }
+    };
 
     public void editTextBarcodeInvoiceAction(boolean enabled, boolean focusable, boolean focusableInTouch){
         editTextBarcodeInvoice.setEnabled(enabled);
@@ -532,112 +618,62 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     }
 
     public void buttonCountMinusAction(boolean enabled, boolean focusable, boolean focusableInTouch){
-        buttonCountMinus.setEnabled(enabled);
-        buttonCountMinus.setFocusable(focusable);
-        buttonCountMinus.setFocusableInTouchMode(focusableInTouch);
+        buttonCountDecrement.setEnabled(enabled);
+        buttonCountDecrement.setFocusable(focusable);
+        buttonCountDecrement.setFocusableInTouchMode(focusableInTouch);
     }
 
     public void buttonCountPlusAction(boolean enabled, boolean focusable, boolean focusableInTouch){
-        buttonCountPlus.setEnabled(enabled);
-        buttonCountPlus.setFocusable(focusable);
-        buttonCountPlus.setFocusableInTouchMode(focusableInTouch);
+        buttonCountIncrement.setEnabled(enabled);
+        buttonCountIncrement.setFocusable(focusable);
+        buttonCountIncrement.setFocusableInTouchMode(focusableInTouch);
+    }
+
+    public void stateElements(boolean editTextBarcode, boolean editTextCount, boolean editTextPrice,
+                              boolean buttonCountIncrement, boolean buttonCountDecrement){
+
+        editTextBarcodeInvoiceAction(editTextBarcode,editTextBarcode,editTextBarcode);
+        editTextCountArticleAction(editTextCount,editTextCount,editTextCount);
+        editTextPriceArticleAction(editTextPrice,editTextPrice,editTextPrice);
+        buttonCountMinusAction(buttonCountDecrement,false,false);
+        buttonCountPlusAction(buttonCountIncrement,false,false);
     }
 
 
-    public void onCreateDialog(){
-        final String title = "Попередження";
-        String message2 = "Ви не зберегли зміни. Зберегти?";
-        String message = "Фактична кількість перевищує планову. Зберегти? ";
-        String button1String = "Ні";
-        String button2String = "Так";
-        String button3String = "Відміна";
+    public void transitionViewPager()
+    {
+        GainInvoiceEditArticlesActivity activity = null;
+        try {
+            activity = (GainInvoiceEditArticlesActivity) getActivity();
+            if(activity.articlesPager != null){
+                if(activity.leftButton == true) {
+                    activity.pagerAdapter.notifyDataSetChanged();
+                    Log.d("item_count", String.valueOf(activity.articlesPager.getCurrentItem()));
+                    activity.articlesPager.setCurrentItem(activity.articlesPager.getCurrentItem() - 1);
 
-        final AlertDialog.Builder ad = new AlertDialog.Builder(getContext());
-        ad.setTitle(title);
-        ad.setMessage(message);
-
-        ad.setNegativeButton(button1String,new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int arg1) {
-
-            }
-        });
-        ad.setPositiveButton(button2String, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int arg1) {
-                addOrUpdateInvoiceRows(correctionType);
-                if(countPc == true){
-                    clearTextView();
-                    editTextCountArticleAction(false,false,false);
-                    editTextBarcodeInvoiceAction(true,true,true);
-                    editTextBarcodeInvoice.requestFocus();
-                    countPc = false;
                 }
-                Toast.makeText(getContext(), "Дані збережено", Toast.LENGTH_LONG)
-                        .show();
 
-
+                else if(activity.rightButton == true) {
+                    activity.pagerAdapter.notifyDataSetChanged();
+                    Log.d("item_count", String.valueOf(activity.articlesPager.getCurrentItem()));
+                    activity.articlesPager.setCurrentItem(activity.articlesPager.getCurrentItem() + 1);
+                }
             }
-        });
-
-        ad.setCancelable(true);
-
-        ad.show();
-    }
-
-
-     public void onCreateDialogBackPressed(){
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Попередження!!!")
-                    .setMessage("Введіть кількість")
-                    .setNegativeButton("ОК",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-            AlertDialog alert = builder.create();
-            alert.show();
-        }
-
-
-    @Override
-    public void onBackPressed() {
-
-            saveInvoiceRows();
-        getActivity().getSupportFragmentManager().popBackStack();
-        getActivity().finish();
-
-    }
-
-    public void updateInvoiceRowWithCondition(){
-        markSave = false;
-
-        if(created == CreateType.pc.ordinal() && invoiceRow.getQuantityAccount() > invoiceRow.getQuantity() )
-        {
-            onCreateDialog();
-        }
-        else if(correctionType == CorrectionType.ctUpdate.ordinal() || created == CreateType.pc.ordinal() && correctionType == CorrectionType.ctCollate.ordinal())
-            addOrUpdateInvoiceRows(correctionType);
-    }
-
-    public void saveInvoiceRows(){
-        if(invoiceRow.getInvoiceRowId() != 0 || invoiceRow.getArticleId() != 0){
-
-            try{
-                invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
-                invoiceRow.setPriceAccount(Float.parseFloat(editTextPriceArticle.getText().toString()));
-
-                float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
-                invoiceRow.setSumaAccount(suma);
-                invoiceRow.setCorrectionTypeId(correctionType);
-                textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
-
-                if(created == CreateType.device.ordinal())
-                    addOrUpdateInvoiceRows(correctionType);
-                else
-                    updateInvoiceRowWithCondition();
-            }
-            catch (Exception ex){}
+        }catch (Exception ex){
         }
 
     }
+    public Boolean isArticlePager() {
+
+        ViewPager pager = null;
+        GainInvoiceEditArticlesActivity activity = null;
+        try {
+            activity = (GainInvoiceEditArticlesActivity) getActivity();
+            pager = activity.articlesPager;
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
 }

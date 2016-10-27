@@ -32,6 +32,9 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
     ListViewArticlesAdapter listViewArticlesAdapter;
     int idInvoice;
     MenuItem searchItem;
+    int corrType;
+    int created;
+    String numberInvoice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,10 +44,10 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
 
 
         Intent getArticleInvoiceIntent = getIntent();
-        int corrType =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.TYPE,0);
+        corrType =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.TYPE,0);
         idInvoice =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.IDINVOICE,0);
-        int created = getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.CREATED,-1);
-        String numberInvoice = getArticleInvoiceIntent.getStringExtra(GainInvoiceEditActivity.NUMBER);
+        created = getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.CREATED,-1);
+        numberInvoice = getArticleInvoiceIntent.getStringExtra(GainInvoiceEditActivity.NUMBER);
 
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -143,7 +146,9 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewArticlesAdapter.setCursor(SqlQuery.getListArticle(getApplicationContext(),idInvoice));
+                    listViewArticlesAdapter = new ListViewArticlesAdapter(getApplicationContext(),SqlQuery.getListArticle(getApplicationContext(),idInvoice),true);
+                    //listViewArticlesAdapter.setCursor(SqlQuery.getListArticle(getApplicationContext(),idInvoice));
+                    listViewArticlesAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -159,5 +164,15 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
                 search.setQuery(s, false);
             }
         return s;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment.newInstance(numberInvoice,idInvoice,corrType,created);
+        fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInvoiceFragment);
+        fragmentTransaction.commit();
+
     }
 }

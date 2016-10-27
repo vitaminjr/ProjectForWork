@@ -132,23 +132,23 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
         searchView.setIconifiedByDefault(false);
 
 
-        gainInvoiceFragment.adapter.setFilterQueryProvider(new FilterQueryProvider() {
+/*        gainInvoiceFragment.adapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence constraint) {
                 return getCursor(constraint.toString());
             }
-        });
+        });*/
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                gainInvoiceFragment.adapter.getFilter().filter(query);
+          //      gainInvoiceFragment.adapter.getFilter().filter(query);
                 gainInvoiceFragment.adapter.notifyDataSetChanged();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                gainInvoiceFragment.adapter.getFilter().filter(newText);
+         //       gainInvoiceFragment.adapter.getFilter().filter(newText);
                 gainInvoiceFragment.adapter.notifyDataSetChanged();
                 return true;
             }
@@ -158,7 +158,7 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
-                    listViewAdapter.setCursor(SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.expense.ordinal()));
+                    listViewAdapter.setCursor(SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.expense.ordinal()));
             }
         });
 
@@ -168,10 +168,10 @@ public class ExpenseInvoiceActivity extends AppCompatActivity implements OnSomeE
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
         if (str == null  ||  str.length () == 0)  {
-            mCursor = SqlQuery.exportInvoices(getApplicationContext(),InvoiceType.expense.ordinal());
+            mCursor = SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.expense.ordinal());
         }
         else {
-            mCursor = SqlQuery.searchInvoice(this, str);
+            mCursor = SqlQuery.searchInvoice(this, str, InvoiceType.expense.ordinal());
 
             if (mCursor != null) {
                 mCursor.moveToFirst();

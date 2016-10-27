@@ -19,6 +19,7 @@ import com.example.vitaminjr.mobileacounting.adapters.InvoicesPagerAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceEditFragment;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
+import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
@@ -84,7 +85,7 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
             fragmentTransaction.commit();
 
         }else {
-            invoiceList = SqlQuery.getListInvoices(SqlQuery.exportInvoices(this, invoiceTypeId));
+            invoiceList = SqlQuery.getListInvoices(SqlQuery.getCursorListInvoices(this, invoiceTypeId));
 
             int position = intent.getIntExtra("position",0);
             initViewPager(position, invoiceList);
@@ -135,33 +136,37 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
                                 invoiceId = invoice.getInvoiceId();
                                 created = invoice.getCreated();
                             }
+
                             switch (drawerItem.getIdentifier()) {
 
                                 case EDIT:
+
                                     if(invoiceId == 0 )
                                         Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
-                                    else
-                                        initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                    else if(created == CreateType.pc.ordinal())
+                                            initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                         else
+                                            initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
                                     break;
 
                                 case REVISION:
-                                   /* if(created == CreateType.device.ordinal())
-                                        initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
-                                    else*/
+
                                     if(invoiceId == 0 )
                                         Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
-                                    else
-                                        initIntent(CorrectionType.ctCollate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                    else if(created == CreateType.pc.ordinal())
+                                            initIntent(CorrectionType.ctCollate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                         else
+                                            initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
                                     break;
 
                                 case REVISIONLIST:
-                                 /*   if(created == CreateType.device.ordinal())
-                                        initIntent(CorrectionType.ctUpdate.ordinal(),ListArticlesInvoiceActivity.class);
-                                    else*/
+
                                     if(invoiceId == 0 )
                                         Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
-                                    else
-                                        initIntent(CorrectionType.ctCollate.ordinal(),ListArticlesInvoiceActivity.class);
+                                    else if(created == CreateType.pc.ordinal())
+                                            initIntent(CorrectionType.ctCollate.ordinal(),ListArticlesInvoiceActivity.class);
+                                         else
+                                            initIntent(CorrectionType.ctUpdate.ordinal(),ListArticlesInvoiceActivity.class);
                                     break;
 
                                 case EXPORT:

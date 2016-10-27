@@ -13,7 +13,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/ThemeLight">
+        android:theme="@style/ThemeLight"
+        android:windowSoftInputMode="adjustPan">
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.MainActivity"
             >
             <intent-filter>
@@ -53,48 +54,67 @@
 
         </activity>
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditArticlesActivity"
-            android:label= "Товари"
+            android:label= "@string/tovars"
             >
 
         </activity>
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.ListArticlesInvoiceActivity"
-            android:label= "Товари"  >
+            android:label= "@string/tovars"  >
 
         </activity><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.InventoryEditActivity"
-            android:label= "Інвертирезація"
+            android:label= "@string/inventory"
             >
 
         </activity>
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.ListStoresActivity"
-            android:label= "Підрозділ"
+            android:label= "@string/subdivision"
             >
 
         </activity>
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.InventoryEditArticlesActivity"
-            android:label= "Редагування товарів">
+            android:label= "@string/edit_tovars">
 
         </activity>
 
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.ListArticlesInventoryActivity"
-            android:label= "Список товарів">
+            android:label= "@string/list_tovars">
 
         </activity>
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.SettingsActivity"
-            android:label= "Налаштування">
+            android:label= "@string/settings">
 
         </activity>
 
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.CreatePriceCheckActivity"
-            android:label= "Перевірка цін">
+            android:label= "@string/check_prices">
 
         </activity>
+
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.InventoryEditArticlesItem"
+            android:label= "@string/edit_tovars">
+
+        </activity>
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.InvoiceEditArticlesItem"
+            android:label= "@string/edit_tovars">
+        </activity>
+
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.RegistrationActivity"
+            android:label= "Реєстрація">
+        </activity>
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.PartInvoiceActivity"
+            android:label= "Розбиття">
+        </activity>
+
+
+
 
 
 

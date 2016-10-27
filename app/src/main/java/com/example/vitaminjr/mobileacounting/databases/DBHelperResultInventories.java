@@ -56,6 +56,25 @@ public class DBHelperResultInventories extends SQLiteOpenHelper {
                 + "unit_name         varchar(20),"
                 + "price             float(15,3),"
                 + "quantity_remains  float(15,3)" + ");");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS inventories_Index0 ON inventories(inventory_id);");
+        db.execSQL(" CREATE INDEX IF NOT EXISTS inventories_Index01 ON inventories(inventory_code);");
+
+        db.execSQL("CREATE INDEX inventory_action_Index01 ON inventory_action(inventory_id);");
+        db.execSQL("CREATE INDEX inventory_action_Index02 ON inventory_action(article_id);");
+
+
+        db.execSQL("CREATE INDEX inventory_rows_Index01 ON inventory_rows(inventory_id);");
+        db.execSQL("CREATE INDEX inventory_rows_Index02 ON inventory_rows(article_id);");
+
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS stores_Index0 ON stores(store_id);");
+        db.execSQL(" CREATE INDEX IF NOT EXISTS stores_Index01 ON stores(store_code);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  articles_index0 ON articles(article_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  articles_Index01 ON articles(article_code);");
+
+
     }
 
     @Override

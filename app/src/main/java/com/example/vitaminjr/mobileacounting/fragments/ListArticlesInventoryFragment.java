@@ -1,6 +1,7 @@
 package com.example.vitaminjr.mobileacounting.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
+import com.example.vitaminjr.mobileacounting.activities.InventoryEditArticlesItem;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewArticlesAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
@@ -83,11 +85,20 @@ public class ListArticlesInventoryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                Intent intent = new Intent(getContext(), InventoryEditArticlesItem.class);
+                intent.putExtra("numberInvoice",numberInvoice);
+                intent.putExtra("inventoryId",inventoryId);
+                intent.putExtra("created",created);
+                intent.putExtra("position",position);
+                intent.putExtra("corrType",CorrectionType.ctUpdate.ordinal());
+                startActivity(intent);
+
+/*
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction().addToBackStack(null);
                 InventoryEditArticlesFragment editFragment = InventoryEditArticlesFragment.newInstance(numberInvoice,inventoryId,created,position, CorrectionType.ctUpdate.ordinal());
                 fragmentTransaction.replace(R.id.article_invoice_container, editFragment);
                 fragmentTransaction.commit();
-                getActivity().findViewById(R.id.layout_header).setVisibility(View.GONE);
+                getActivity().findViewById(R.id.layout_header).setVisibility(View.GONE);*/
 
             }
         });
@@ -141,6 +152,7 @@ public class ListArticlesInventoryFragment extends Fragment {
     public void initAdapter(){
         adapter = new ListViewArticlesAdapter(getContext(), SqlQuery.getListInventoryAction(getContext(), inventoryId),true);
         listView.setAdapter(adapter);
+        adapter.setToggle(true);
     }
 
 }

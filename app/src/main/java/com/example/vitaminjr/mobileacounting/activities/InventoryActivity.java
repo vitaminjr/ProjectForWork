@@ -90,7 +90,12 @@ public class InventoryActivity extends AppCompatActivity implements OnEventListe
                                 SqlQuery.exportInventoryRows(getApplicationContext());
                                 SqlQuery.exportStores(getApplicationContext());
                                 SqlQuery.exportArticlesInventory(getApplicationContext());
-                                Toast.makeText(getApplicationContext(),"Екпортовано Успішно!!!",Toast.LENGTH_SHORT).show();
+                                try {
+
+                                    Toast.makeText(getApplicationContext(), R.string.export_successfully, Toast.LENGTH_SHORT).show();
+                                }catch (Exception ex){
+                                    Toast.makeText(getApplicationContext(), R.string.error_export, Toast.LENGTH_SHORT).show();
+                                }
                                 break;
                         }
                     }

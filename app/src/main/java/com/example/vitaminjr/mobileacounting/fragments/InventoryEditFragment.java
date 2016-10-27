@@ -2,7 +2,9 @@ package com.example.vitaminjr.mobileacounting.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -23,6 +25,7 @@ import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.activities.ListStoresActivity;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 
@@ -118,6 +121,12 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
         textViewNumber.clearFocus();
         buttonDate = (Button) view.findViewById(R.id.button_edit_date);
         buttonStores = (Button) view.findViewById(R.id.button_choice_stores);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if(preferences.getBoolean("show_keyboard",false) == false){
+            SetHideNotKeyboard hideBarcode = new SetHideNotKeyboard(getActivity(),textViewNumber);
+            textViewNumber.setOnTouchListener(hideBarcode);
+        }
     }
 
     public void Listeners(){
@@ -138,6 +147,7 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
         buttonDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                inventoryInvoice.setNumber(String.valueOf(textViewNumber.getText()));
                 DialogFragment datePicker = new DatePickerDialogFragment();
                 datePicker.setTargetFragment(linkFragment,REQUEST_DATE_INVOICE);
                 datePicker.show(getFragmentManager(),"datePicker");
@@ -146,6 +156,7 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
         buttonStores.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                inventoryInvoice.setNumber(String.valueOf(textViewNumber.getText()));
                 Intent intent = new Intent(getContext(),ListStoresActivity.class);
                 startActivityForResult(intent,REQUEST_STORES);
             }
@@ -205,21 +216,23 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
             inventoryInvoice.setCreated(CreateType.device.ordinal());
             SqlQuery.insertInventory(getContext(),inventoryInvoice);
 
-            showToast("Створення");
+            showToast("створено");
             inventoryIdForActivity  = inventoryInvoice.getInventoryId();
             markSave = true;
+            inventoryId = inventoryInvoice.getInventoryId();
+            inventoryInvoiceCopy = inventoryInvoice;
         }
         else
         {
 
             SqlQuery.updateInventory(getContext(),inventoryInvoice);
-            showToast("Оновлення");
+            showToast("оновлено");
             markSave = true;
         }
     }
 
     public void showToast(String nameType){
-        Toast.makeText(getContext(), nameType +  " збережено",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "Накладну " + nameType,Toast.LENGTH_SHORT).show();
     }
 
 

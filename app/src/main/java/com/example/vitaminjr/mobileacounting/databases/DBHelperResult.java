@@ -58,6 +58,19 @@ public class DBHelperResult extends SQLiteOpenHelper {
                 " unit_name         varchar(20), " +
                 " price             float(15,3), " +
                 " quantity_remains  float(15,3));");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  articles_index0 ON articles(article_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  articles_Index01 ON articles(article_code);");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS providers_Index01 ON providers(provider_code);");
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS providers_index0 ON providers(provider_id);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS invoice_rows_Index01 ON invoice_rows(invoice_row_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS invoice_rows_Index02 ON invoice_rows(invoice_id);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  invoices_Index01 ON invoices(invoice_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  invoices_Index02 ON invoices(invoice_code);");
+
     }
 
     @Override

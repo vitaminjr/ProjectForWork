@@ -135,4 +135,14 @@
 
     </LinearLayout>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/button_rect"
+        android:id="@+id/partition"
+        android:text="Розбиття"/>
+
 </LinearLayout>

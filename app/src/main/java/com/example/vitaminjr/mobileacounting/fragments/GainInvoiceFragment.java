@@ -6,10 +6,14 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -90,24 +94,25 @@ public class GainInvoiceFragment extends Fragment {
             }
         });
         listView = (ListView) getActivity().findViewById(R.id.listView);
-        cursor = SqlQuery.exportInvoices(getContext(), invoiceTypeId);
-        adapter = new ListViewAdapter(getContext(), cursor,true);
+        cursor = SqlQuery.getCursorListInvoices(getContext(), invoiceTypeId);
+        adapter = new ListViewAdapter(getContext(), cursor, false);
         onSomaEventListener.someEvent(adapter);
         listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    Intent intent = new Intent(getContext(), GainInvoiceEditActivity.class);
-                    intent.putExtra("id", id);
-                    intent.putExtra("position", position);
-                    intent.putExtra("type", invoiceTypeId);
-                    Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(), id));
-                    intent.putExtra("created", invoice.getCreated());
-                    startActivity(intent);
+                Intent intent = new Intent(getContext(), GainInvoiceEditActivity.class);
+                intent.putExtra("id", id);
+                intent.putExtra("position", position);
+                intent.putExtra("type", invoiceTypeId);
+                Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(), id));
+                intent.putExtra("created", invoice.getCreated());
+                startActivity(intent);
             }
         });
+
 
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -150,7 +155,7 @@ public class GainInvoiceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        adapter = new ListViewAdapter(getContext(),SqlQuery.exportInvoices(getContext(), invoiceTypeId),true);
+        adapter = new ListViewAdapter(getContext(),SqlQuery.getCursorListInvoices(getContext(), invoiceTypeId),true);
         listView.setAdapter(adapter);
     }
 

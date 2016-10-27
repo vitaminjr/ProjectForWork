@@ -21,7 +21,7 @@
                     android:paddingTop="@dimen/tool_bar_top_padding"
                     android:clickable="false"
                     android:transitionName="actionBar"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
         </FrameLayout>
 
@@ -71,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Прихідна накладна"
+                    android:text="@string/gain"
                     android:textSize="20dp"
                     android:padding="10dp"
                     android:layout_marginTop="10dp"
@@ -84,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Видаткова накладна"
+                    android:text="@string/expense"
                     android:textSize="20dp"
                     android:padding="10dp"
                     android:id="@+id/edit_expense_invoice"
@@ -117,7 +117,7 @@
                         <TextView
                             android:layout_width="250dp"
                             android:layout_height="wrap_content"
-                            android:text="Перевірка цін"
+                            android:text="@string/check_prices"
                             android:textSize="20dp"
                             android:padding="10dp"
                             android:textColor="#1d488c"
@@ -196,7 +196,7 @@
                         <TextView
                             android:layout_width="250dp"
                             android:layout_height="wrap_content"
-                            android:text="Інвентаризація"
+                            android:text="@string/inventory"
                             android:textSize="20dp"
                             android:padding="10dp"
                             android:textColor="#1d488c"
@@ -259,6 +259,7 @@
     android:layout_height="wrap_content"
     android:layout_alignParentEnd="true"
     android:layout_alignParentRight="true"
+    android:id="@+id/action_menu"
     android:layout_alignParentBottom="true"
     app:fab_addButtonColorNormal="@color/common_action_bar_splitter"
     app:fab_addButtonColorPressed="#BDBDBD"
@@ -274,7 +275,7 @@
             app:fab_icon="@drawable/ic_file_download_white_24dp"
             app:fab_colorNormal="#0091EA"
             app:fab_colorPressed="#00B0FF"
-            app:fab_title="Загрузити БД"/>
+            app:fab_title="Завантажити БД"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
@@ -284,7 +285,7 @@
             app:fab_icon="@drawable/ic_settings_white_24dp"
             app:fab_colorNormal="#2962FF"
             app:fab_colorPressed="#2979FF"
-            app:fab_title="Налаштування"/>
+            app:fab_title="@string/settings"/>
 
 </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

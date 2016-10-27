@@ -83,8 +83,6 @@ public class InventoryEditArticlesActivity extends AppCompatActivity {
             } else {
                 super.onBackPressed();
             }
-
-            finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -108,7 +106,6 @@ public class InventoryEditArticlesActivity extends AppCompatActivity {
             super.onBackPressed();
         }
 
-        //findViewById(R.id.fragment_edit_invoice_pager).setVisibility(View.VISIBLE);
     }
 
 }

@@ -23,6 +23,19 @@ public class DBHelperResultPriceCheck  extends SQLiteOpenHelper {
                 "price_check_id  integer PRIMARY KEY AUTOINCREMENT," +
                 "barcode         varchar(20)," +
                 "article_id      integer " + ");");
+
+        db.execSQL(" CREATE TABLE IF NOT EXISTS articles ( " +
+                " article_id        integer PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                " article_code      varchar(50), " +
+                " code              varchar(50), " +
+                " name              varchar(100), " +
+                " unit_name         varchar(20), " +
+                " price             float(15,3), " +
+                " quantity_remains  float(15,3));");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  articles_index0 ON articles(article_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  articles_Index01 ON articles(article_code);");
+        db.execSQL(" CREATE INDEX IF NOT EXISTS price_check_Index01 ON price_check(article_id);");
     }
 
     @Override

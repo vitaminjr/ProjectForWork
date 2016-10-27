@@ -71,7 +71,7 @@ public class ExportFile extends AsyncTask<Void,Integer,Boolean> {
 
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 
-        pd.setMessage("Завантаження");
+        pd.setMessage("Вивантаження");
 
         pd.getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#00FFFFFF")));
 
@@ -91,18 +91,13 @@ public class ExportFile extends AsyncTask<Void,Integer,Boolean> {
 
             OutputStream out = localAuditPCFile.getOutputStream();
 
-          //  SmbFile sizeFile = new SmbFile(fileAddress);
-           // pd.setMax((int) sizeFile.length());
-
             byte[] buf = new byte[1024];
             int len;
             float sum = 0;
 
             while ((len = in.read(buf)) > 0)
             {
-           //     sum += len;
                 out.write(buf, 0, len);
-             //   publishProgress((int) sum);
             }
             in.close();
             out.close();

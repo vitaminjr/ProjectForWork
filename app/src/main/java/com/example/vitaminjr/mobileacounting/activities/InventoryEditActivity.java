@@ -116,9 +116,9 @@ public class InventoryEditActivity extends AppCompatActivity {
                         }
                         else
                         {
-                            Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getApplicationContext(), GainInvoiceEditFragment.idInvoiceforActivity));
-                            numberInventory = invoice.getNumberInvoice();
-                            inventoryId = invoice.getInvoiceId();
+                            InventoryInvoice invoice = SqlQuery.getInventoriesInvoice(SqlQuery.getInventoriesByIdCursor(getApplicationContext(), InventoryEditFragment.inventoryIdForActivity));
+                            numberInventory = invoice.getNumber();
+                            inventoryId = invoice.getInventoryId();
                             created = invoice.getCreated();
                         }
 

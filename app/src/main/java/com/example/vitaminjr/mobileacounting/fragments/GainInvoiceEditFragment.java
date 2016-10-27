@@ -3,10 +3,14 @@ package com.example.vitaminjr.mobileacounting.fragments;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -23,11 +27,19 @@ import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.activities.ListProviderInvoiceActivity;
+import com.example.vitaminjr.mobileacounting.activities.PartInvoiceActivity;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
+import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.vitaminjr.mobileacounting.databases.SqlQuery.articleListFromCursor;
 
 /**
  * Created by vitaminjr on 12.07.16.
@@ -35,6 +47,7 @@ import com.example.vitaminjr.mobileacounting.models.Invoice;
 public class GainInvoiceEditFragment extends Fragment implements OnBackPressedListener {
 
     private Button dateButton;
+    private Button partButton;
     private EditText numberText;
     private TextView codeEDRPOUText;
     private Button buttonChoiceProvider;
@@ -98,17 +111,28 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fraqgment_edit_gain_invoice, container, false);
         initGui(view);
-       if(invoiceId != 0)
-         invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(),invoiceId));
+       if(invoiceId != 0) {
+           invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(), invoiceId));
+           if (invoice.getCreated() == CreateType.pc.ordinal())
+           {
+               dateButton.setEnabled(false);
+               buttonChoiceProvider.setEnabled(false);
+               numberText.setEnabled(false);
+           }
+       }
+
+        if(invoice.getCreated() == CreateType.device.ordinal() || invoiceId == 0){
+            view.findViewById(R.id.partition).setVisibility(View.GONE);
+        }
 
         invoiceTypeId = invoice.getInvoiceTypeId();
         if(invoiceTypeId == InvoiceType.profit.ordinal()) {
-            textInvoice.setText("Прибуткова накладна");
-            textTypeProvider.setText("Постачальник:");
+            textInvoice.setText(R.string.gain);
+            textTypeProvider.setText(R.string.provider);
         }
         else {
-            textInvoice.setText("Видаткова накладна");
-            textTypeProvider.setText("Покупець:");
+            textInvoice.setText(R.string.expense);
+            textTypeProvider.setText(R.string.customer);
         }
 
         showInvoice(invoice);
@@ -140,8 +164,19 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
         textInvoice = (TextView) view.findViewById(R.id.text_invoice);
         textTypeProvider = (TextView) view.findViewById(R.id.text_type_provider);
         numberText.clearFocus();
+        partButton = (Button) view.findViewById(R.id.partition);
         codeEDRPOUText = (TextView) view.findViewById(R.id.text_view_code_edrpou);
         buttonChoiceProvider = (Button) view.findViewById(R.id.button_choice_stores);
+
+
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if(preferences.getBoolean("show_keyboard",false) == false){
+            SetHideNotKeyboard hideNumber = new SetHideNotKeyboard(getActivity(),numberText);
+            numberText.setOnTouchListener(hideNumber);
+        }
+
+
 
 
         initListeners();
@@ -182,6 +217,31 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
             }
         });
 
+        partButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Cursor cursor = SqlQuery.getListArticle(getContext(),invoice.getInvoiceId());
+                List<InvoiceRow> list =  SqlQuery.articleListFromCursor(cursor);
+                if(list.size()!= 0) {
+                    Invoice newInvoice = new Invoice();
+                    newInvoice.setCodeEDRPOU(invoice.getCodeEDRPOU());
+                    newInvoice.setDateCreateInvoice(invoice.getDateCreateInvoice());
+                    newInvoice.setNameProvider(invoice.getNameProvider());
+                    newInvoice.setCreated(invoice.getCreated());
+                    newInvoice.setProviderId(invoice.getProviderId());
+                    newInvoice.setInvoiceTypeId(invoice.getInvoiceTypeId());
+                    newInvoice.setNumberInvoice(invoice.getNumberInvoice());
+                    newInvoice.setInvoiceId(invoice.getInvoiceId());
+                    Intent intent = new Intent(getContext(), PartInvoiceActivity.class);
+                    intent.putExtra("invoice", newInvoice);
+                    startActivity(intent);
+                }else
+                    Toast.makeText(getContext(),"Відсутні пораховані позиції",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 
     @Override
@@ -214,6 +274,7 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
         numberText.setText(String.valueOf(invoice.getNumberInvoice()));
         buttonChoiceProvider.setText(invoice.getNameProvider());
 
+
         codeEDRPOUText.setText(invoice.getCodeEDRPOU());
         if(dateEditInvoice != null)
             dateButton.setText(dateEditInvoice);
@@ -223,7 +284,7 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
 
 
     public void showToast(String nameType){
-        Toast.makeText(getContext(), nameType +  " збережено",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "Накладну" + nameType,Toast.LENGTH_SHORT).show();
     }
 
 
@@ -235,16 +296,18 @@ public class GainInvoiceEditFragment extends Fragment implements OnBackPressedLi
             invoice.setNumberInvoice(numberText.getText().toString());
             SqlQuery.insertInvoice(getContext(),invoice);
 
-            showToast("Створення");
+            showToast(" створено");
             idInvoiceforActivity = invoice.getInvoiceId();
             markSave = true;
+            invoiceId = invoice.getInvoiceId();
+            invoiceCopy = invoice;
         }
         else
         {
             invoice.setInvoiceCode(String.valueOf(invoice.getInvoiceId()));
             invoice.setNumberInvoice(numberText.getText().toString());
             SqlQuery.updateInvoice(getContext(),invoice);
-            showToast("Оновлення");
+            showToast(" оновлено");
             markSave = true;
         }
 
