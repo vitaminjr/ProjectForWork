@@ -86,6 +86,19 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         return gainInvoiceEditArticlesFragment;
     }
 
+    public static GainInvoiceEditArticlesFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        GainInvoiceEditArticlesFragment fragment = new GainInvoiceEditArticlesFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    public GainInvoiceEditArticlesFragment() {
+    }
+
     public GainInvoiceEditArticlesFragment(String number, int typeFragment, int idInvoice, int created)
     {
         invoiceRow = new InvoiceRow();
