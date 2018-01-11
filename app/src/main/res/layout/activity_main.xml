@@ -19,8 +19,8 @@
                     android:elevation="4dp"
                     android:minHeight="?attr/actionBarSize"
                     android:paddingTop="@dimen/tool_bar_top_padding"
-                    android:clickable="false"
                     android:transitionName="actionBar"
+                    android:clickable="false"
                     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
         </FrameLayout>
@@ -68,7 +68,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
                     android:text="@string/gain"
@@ -81,7 +81,7 @@
                     />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
                     android:text="@string/expense"
@@ -90,6 +90,19 @@
                     android:id="@+id/edit_expense_invoice"
                     style="@style/button_styles_main_activity"
                     />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="@string/move"
+                    android:textSize="20dp"
+                    android:padding="10dp"
+                    android:id="@+id/edit_move_invoice"
+                    style="@style/button_styles_main_activity"
+                    />
+
+
 
 
         </LinearLayout>
@@ -141,7 +154,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="10dp"
+
                     android:layout_marginTop="10dp">
 
                         <TextView
@@ -149,7 +162,7 @@
                             android:layout_height="wrap_content"
                             android:text="створити"
                             android:id="@+id/create_price_check"
-                            android:layout_marginLeft="30dp"
+                            android:layout_marginLeft="20dp"
                             android:textSize="18dp"
                             android:padding="10dp"
                             android:layout_weight="1"
@@ -164,7 +177,7 @@
                             android:id="@+id/edit_price_check"
                             android:textSize="18dp"
                             android:padding="10dp"
-                            android:layout_marginRight="20dp"
+                            android:layout_marginRight="10dp"
                             android:textColor="#FF21509B"
                             style="@style/button_styles_main_activity"
                             />
@@ -222,7 +235,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="10dp"
+
                     android:layout_marginTop="10dp">
 
                         <TextView
@@ -230,7 +243,7 @@
                             android:layout_height="wrap_content"
                             android:text="редагувати"
                             android:id="@+id/edit_inventory"
-                            android:layout_marginLeft="30dp"
+                            android:layout_marginLeft="20dp"
                             android:textSize="18dp"
                             android:layout_weight="1"
                             android:padding="10dp"
@@ -243,7 +256,7 @@
                             android:layout_weight="1"
                             android:text="переглянути"
                             android:id="@+id/review_inventory"
-                            android:layout_marginRight="20dp"
+                            android:layout_marginRight="10dp"
                             android:textSize="18dp"
                             android:padding="10dp"
                             android:textColor="#FF21509B"

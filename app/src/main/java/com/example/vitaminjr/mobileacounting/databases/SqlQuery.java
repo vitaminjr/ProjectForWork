@@ -10,22 +10,23 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.activities.RegistrationActivity;
+import com.example.vitaminjr.mobileacounting.file.ReadFileFromRecource;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
+import com.example.vitaminjr.mobileacounting.helpers.ReverseDate;
+import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.models.Article;
 import com.example.vitaminjr.mobileacounting.models.BarcodeTamplateInfo;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 import com.example.vitaminjr.mobileacounting.models.InventoryAction;
-import com.example.vitaminjr.mobileacounting.models.InventoryRow;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
 import com.example.vitaminjr.mobileacounting.models.InvoiceRow;
-import com.example.vitaminjr.mobileacounting.models.Provider;
 import com.example.vitaminjr.mobileacounting.models.ResultTemplate;
-import com.example.vitaminjr.mobileacounting.models.Store;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by vitaminjr on 08.08.16.
@@ -39,7 +40,8 @@ public class SqlQuery {
                         "   a.name as article_name, " +
                         "   ir.correction_type_id AS type, " +
                         "   a.unit_name as article_unit_name, " +
-                        "   a.price as article_price " +
+                        "   a.price as article_price, " +
+                        "   a.code as article_code " +
                         " FROM invoice_rows ir " +
                         "   LEFT JOIN articles a ON (a.article_id = ir.article_id) " +
                         " WHERE ir.invoice_id = " + invoiceId
@@ -54,6 +56,8 @@ public class SqlQuery {
 
 
         cursor.moveToFirst();
+        if (cursor.getCount()==0)
+            return list;
         do {
             if(cursor.getInt(cursor.getColumnIndex("type")) != CorrectionType.ctNone.ordinal()) {
                 InvoiceRow invoiceRow = new InvoiceRow();
@@ -82,20 +86,21 @@ public class SqlQuery {
                 "   a.name as article_name, " +
                 "   ir.correction_type_id AS type, " +
                 "   a.unit_name as article_unit_name, " +
-                "   a.price as article_price " +
+                "   a.price as article_price, " +
+                " a.code as article_code " +
                 " FROM invoice_rows ir " +
                 "   LEFT JOIN articles a ON (a.article_id = ir.article_id) " +
-                " WHERE (ir.invoice_id = " + invoiceId + ") AND (article_name  LIKE \"%" + filter + "%\" " +
-                " OR ir.barcode LIKE \"%" + filter + "%\" )" , null);
+                " WHERE (ir.invoice_id = " + invoiceId + ") AND (upper_name  LIKE \"%" + filter.toUpperCase() + "%\" " +
+                " OR ir.barcode LIKE \"%" + filter + "%\"  OR a.code LIKE \"%" + filter + "%\" )  " , null);
         return c;
     }
 
     public static InvoiceRow getArticleFromPosition(Cursor cursor, int position){
         InvoiceRow invoiceArticle = new InvoiceRow();
         if(cursor.moveToPosition(position)) {
-            int articleIdColIndex = cursor.getColumnIndex("_id");
+            int articleIdColIndex = cursor.getColumnIndex("article_id");
 
-            int invoiceRowIdColIndex = cursor.getColumnIndex("invoice_row_id");
+            int invoiceRowIdColIndex = cursor.getColumnIndex("_id");
             int invoiceSumaAccount = cursor.getColumnIndex("suma_account");
             int nameColIndex = cursor.getColumnIndex("article_name");
             int unitNameColIndex = cursor.getColumnIndex("article_unit_name");
@@ -106,6 +111,8 @@ public class SqlQuery {
             int sumaColIndex = cursor.getColumnIndex("suma");
             int quantityColIndex = cursor.getColumnIndex("quantity");
 
+
+            invoiceArticle.setArticleId(cursor.getInt(articleIdColIndex));
             invoiceArticle.setInvoiceRowId(cursor.getInt(invoiceRowIdColIndex));
             invoiceArticle.setQuantityAccount(cursor.getFloat(quantityAccountColIndex));
             invoiceArticle.setPriceAccount(cursor.getFloat(priceAccountColIndex));
@@ -188,7 +195,21 @@ public class SqlQuery {
             prefiks = code[0];
             Log.d("prefics",prefiks);
 
-            if(barcode.substring(0,prefiks.length()).equals(prefiks) && barcode.length() >= codeTemplate.length())
+           // char[] prefiksChar = prefiks.toCharArray();
+          //  char[] barcodeCharPreficsOneSymbool = barcode.substring(0).toCharArray();
+            int barcodeIntPreficsTwoSymbool = 0;
+            int intPrefiks = 0;
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if(preferences.getBoolean("one_symbool_prefiks",false) == true ){
+                 barcodeIntPreficsTwoSymbool = Integer.parseInt(barcode.substring(0,1));
+                 intPrefiks = Integer.parseInt(code[0].substring(0,1));
+            }else if(barcode.length()>1){
+                 barcodeIntPreficsTwoSymbool = Integer.parseInt(barcode.substring(0,2).toString());
+                 intPrefiks = Integer.parseInt(code[0]);
+            }
+
+
+            if((intPrefiks == barcodeIntPreficsTwoSymbool || barcode.substring(0,prefiks.length()).equals(prefiks)) && barcode.length() >= codeTemplate.length())
             {
                 codeSize = 0;
                 quantitySize = 0;
@@ -234,7 +255,8 @@ public class SqlQuery {
                         "a.price, " +
                         "a.unit_name, " +
                         "a.name, " +
-                        "ab.barcode " +
+                        "ab.barcode, " +
+                        "a.price_out " +
                         " FROM articles a " +
                         " LEFT JOIN article_barcodes ab ON (a.article_id = ab.article_id) " +
                         "WHERE a.code = " + codeTemp + " GROUP BY a.article_id", null);
@@ -251,7 +273,8 @@ public class SqlQuery {
                 "a.price, " +
                 "a.unit_name, " +
                 "a.name, " +
-                "ab.barcode " +
+                "ab.barcode, " +
+                "a.price_out " +
                 " FROM article_barcodes ab " +
                 " LEFT JOIN articles a ON (a.article_id = ab.article_id) " +
                 "WHERE ab.barcode = " + String.valueOf(barcode), null);
@@ -261,7 +284,8 @@ public class SqlQuery {
                     "a.price, " +
                     "a.unit_name, " +
                     "a.name, " +
-                    "ab.barcode " +
+                    "ab.barcode, " +
+                    "a.price_out " +
                     " FROM articles a " +
                     " LEFT JOIN article_barcodes ab ON (a.article_id = ab.article_id) " +
                     "WHERE a.code = " + String.valueOf(barcode) + " GROUP BY a.article_id", null);
@@ -278,7 +302,9 @@ public class SqlQuery {
         Cursor c = db.rawQuery(" SELECT ir.*, " +
                 "   a.name as article_name, " +
                 "   a.unit_name as article_unit_name, " +
-                "   a.price as article_price " +
+                "   a.price as article_price, " +
+                "   a.price_out as article_price_out, " +
+                "   a.code as article_code " +
                 " FROM invoice_rows ir " +
                 "   LEFT JOIN articles a ON (a.article_id = ir.article_id) " +
                 " WHERE ir.invoice_id = " + invoiceId + " AND a.article_id = " + String.valueOf(articleId) +
@@ -293,6 +319,7 @@ public class SqlQuery {
             int articleIdColIndex = c.getColumnIndex("article_id");
             int quantityColIndex = c.getColumnIndex("quantity");
             int priceColIndex = c.getColumnIndex("price");
+            int priceOutColIndex = c.getColumnIndex("article_price_out");
             int sumaColIndex = c.getColumnIndex("suma");
             int quantityAccountColIndex = c.getColumnIndex("quantity_account");
             int priceAccountColIndex = c.getColumnIndex("price_account");
@@ -302,12 +329,13 @@ public class SqlQuery {
 
             invoiceRow.setName(c.getString(c.getColumnIndex("article_name")));
             invoiceRow.setUnitName(c.getString(c.getColumnIndex("article_unit_name")));
-            invoiceRow.setInvoiceId(Integer.parseInt(c.getString(idColIndex)));
+            invoiceRow.setInvoiceId(c.getInt(idColIndex));
             invoiceRow.setBarcode(c.getString(barcodeColIndex));
             invoiceRow.setArticleId(c.getLong(articleIdColIndex));
-            invoiceRow.setQuantity(c.getInt(quantityColIndex));
-            invoiceRow.setPrice(c.getInt(priceColIndex));
-            invoiceRow.setSuma(c.getInt(sumaColIndex));
+            invoiceRow.setQuantity(c.getFloat(quantityColIndex));
+            invoiceRow.setPrice(c.getFloat(priceColIndex));
+            invoiceRow.setPriceOut(c.getFloat(priceColIndex));
+            invoiceRow.setSuma(c.getFloat(sumaColIndex));
             invoiceRow.setQuantityAccount(c.getFloat(quantityAccountColIndex));
             invoiceRow.setPriceAccount(c.getFloat(priceAccountColIndex));
             invoiceRow.setSumaAccount(c.getFloat(sumaAccountColIndex));
@@ -326,13 +354,16 @@ public class SqlQuery {
             int unitNameColIndex = cursor.getColumnIndex("unit_name");
             int barcodeColIndex = cursor.getColumnIndex("barcode");
             int priceColIndex = cursor.getColumnIndex("price");
+            int priceOutIndex = cursor.getColumnIndex("price_out");
 
             do {
                 invoiceRow.setArticleId(cursor.getInt(articleIdColIndex));
                 invoiceRow.setName(cursor.getString(nameColIndex));
                 invoiceRow.setPrice(cursor.getFloat(priceColIndex));
                 invoiceRow.setBarcode(cursor.getString(barcodeColIndex));
-                invoiceRow.setUnitName(cursor.getString(unitNameColIndex));;
+                invoiceRow.setUnitName(cursor.getString(unitNameColIndex));
+                invoiceRow.setPriceOut(cursor.getFloat(priceOutIndex));
+
             }
             while (cursor.moveToNext());
         }
@@ -353,6 +384,100 @@ public class SqlQuery {
                 "   LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
                 " WHERE inv.invoice_type_id = " + invoiceTypeId +
                 " ORDER BY inv.number ", null);
+        return c;
+    }
+
+
+    public static Cursor getCursorListInvoicesMove(Context context, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.provider_id, " +
+                "   s.name as provider_name, " +
+                "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created" +
+                " FROM invoices inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                " WHERE inv.invoice_type_id = " + invoiceTypeId +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
+
+    public static Cursor getCursorListInvoicesByProvider(Context context, long providerId, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.provider_id, " +
+                "   p.name as provider_name, " +
+                "   p.code_EDRPOU as provider_code_EDRPOU, " +
+                "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created" +
+                " FROM invoices inv " +
+                "   LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
+                " WHERE inv.provider_id = " + providerId + " AND inv.invoice_type_id = " + invoiceTypeId +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
+    public static Cursor getCursorListInvoicesMoveByProvider(Context context, long providerId, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.provider_id, " +
+                "   s.name as provider_name, " +
+                "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created" +
+                " FROM invoices inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                " WHERE inv.provider_id = " + providerId + " AND inv.invoice_type_id = " + invoiceTypeId +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
+
+
+    public static Cursor getCursorListInvoicesWithoutComplete(Context context, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "inv.number, " +
+                "inv.provider_id, " +
+                "p.name as provider_name, " +
+                "p.code_EDRPOU as provider_code_EDRPOU, " +
+                "inv.date_d, " +
+                "inv.invoice_type_id, " +
+                "inv.created, " +
+                "SUM(ir.quantity) as quantity, SUM(ir.quantity_account) as quantity_account " +
+                "FROM invoices inv " +
+                "LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
+                "LEFT JOIN invoice_rows ir ON (ir.invoice_id = inv.invoice_id) " +
+                "WHERE inv.invoice_type_id = " + invoiceTypeId + " AND " +
+                " ((inv.created = 1) OR (inv.created = 0 AND quantity <> quantity_account)) " +
+                "GROUP BY inv.invoice_id " +
+                "ORDER BY inv.number", null);
+        return c;
+    }
+
+    public static Cursor getCursorListInvoicesMoveWithoutComplete(Context context, int invoiceTypeId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "inv.number, " +
+                "inv.provider_id, " +
+                "s.name as provider_name, " +
+                "inv.date_d, " +
+                "inv.invoice_type_id, " +
+                "inv.created, " +
+                "SUM(ir.quantity) as quantity, SUM(ir.quantity_account) as quantity_account " +
+                "FROM invoices inv " +
+                "LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                "LEFT JOIN invoice_rows ir ON (ir.invoice_id = inv.invoice_id) " +
+                "WHERE inv.invoice_type_id = " + invoiceTypeId + " AND " +
+                " ((inv.created = 1) OR (inv.created = 0 AND quantity <> quantity_account)) " +
+                "GROUP BY inv.invoice_id " +
+                "ORDER BY inv.number", null);
         return c;
     }
 
@@ -392,10 +517,12 @@ public class SqlQuery {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
+                "   inv.number_doc, " +
                 "   inv.provider_id, " +
                 "   p.name as provider_name, " +
                 "   p.code_EDRPOU as provider_code_EDRPOU, " +
                 "   inv.date_d, " +
+                "   inv.date_doc, " +
                 "   inv.invoice_type_id, " +
                 "   inv.created" +
                 " FROM invoices inv " +
@@ -404,10 +531,29 @@ public class SqlQuery {
                 " ORDER BY inv.number ", null);
         return c;
     }
+    public static Cursor getInvoiceMoveById(Context context, long invoiceId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.number_doc, " +
+                "   inv.provider_id, " +
+                "   s.name as provider_name, " +
+                "   inv.date_d, " +
+                "   inv.date_doc, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created" +
+                " FROM invoices inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                " WHERE inv.invoice_id = " + invoiceId +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
 
     public static Cursor searchInvoice(Context context, String filter, int invoiceType) {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+
+        String query = "SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
                 "   p.name as provider_name, " +
@@ -417,22 +563,100 @@ public class SqlQuery {
                 "   inv.created" +
                 " FROM invoices inv " +
                 "   LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
-                " WHERE ( inv.invoice_type_id = " + invoiceType + " ) AND (" +
+                " WHERE ( inv.invoice_type_id = " + invoiceType + ") AND (" +
                 "       inv.number LIKE \"%" + filter + "%\" OR " +
-                "       p.name LIKE \"%" + filter + "%\" OR " +
+                "       p.upper_name LIKE \"%" + filter.toUpperCase() + "%\" OR " +
                 "       p.code_EDRPOU LIKE \"%" + filter + "%\" )" +
-                " ORDER BY inv.number ", null);
+                " ORDER BY inv.number ";
+
+        Cursor c = db.rawQuery(query, null);
         return c;
     }
 
-    public static Cursor getInvoiceById(Context context, int invoiceId) {
+    public static Cursor searchInvoiceMove(Context context, String filter, int invoiceType) {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+
+        String query = "SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.provider_id, " +
+                "   s.name as provider_name, " +
+                "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created" +
+                " FROM invoices inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                " WHERE ( inv.invoice_type_id = " + invoiceType + ") AND (" +
+                "       inv.number LIKE \"%" + filter + "%\" OR " +
+                "       s.upper_name LIKE \"%" + filter.toUpperCase() + "%\" )" +
+                " ORDER BY inv.number ";
+
+        Cursor c = db.rawQuery(query, null);
+        return c;
+    }
+
+    public static Cursor searchInvoiceWithoutComplete(Context context, String filter, int invoiceType) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        String query = "SELECT inv.invoice_id AS _id, " +
                 "   inv.number, " +
                 "   inv.provider_id, " +
                 "   p.name as provider_name, " +
                 "   p.code_EDRPOU as provider_code_EDRPOU, " +
                 "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created, " +
+                " SUM(ir.quantity) as quantity, SUM(ir.quantity_account) as quantity_account " +
+                " FROM invoices inv " +
+                " LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
+                " LEFT JOIN invoice_rows ir ON (ir.invoice_id = inv.invoice_id) " +
+                " WHERE ( inv.invoice_type_id = " + invoiceType + ")" +" AND " +
+                " ((inv.created = 1) OR (inv.created = 0 AND quantity <> quantity_account)) "
+                + " AND (" +
+                "       inv.number LIKE \"%" + filter + "%\" OR " +
+                "       p.upper_name LIKE \"%" + filter.toUpperCase() + "%\" OR " +
+                "       p.code_EDRPOU LIKE \"%" + filter + "%\" )" +
+                "GROUP BY inv.invoice_id" +
+                " ORDER BY inv.number ";
+
+        Cursor c = db.rawQuery(query, null);
+        return c;
+    }
+
+    public static Cursor searchInvoiceMoveWithoutComplete(Context context, String filter, int invoiceType) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        String query = "SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.provider_id, " +
+                "   s.name as provider_name, " +
+                "   inv.date_d, " +
+                "   inv.invoice_type_id, " +
+                "   inv.created, " +
+                " SUM(ir.quantity) as quantity, SUM(ir.quantity_account) as quantity_account " +
+                " FROM invoices inv " +
+                " LEFT JOIN stores s ON (s.store_id = inv.provider_id) " +
+                " LEFT JOIN invoice_rows ir ON (ir.invoice_id = inv.invoice_id) " +
+                " WHERE ( inv.invoice_type_id = " + invoiceType + ")" +" AND " +
+                " ((inv.created = 1) OR (inv.created = 0 AND quantity <> quantity_account)) "
+                + " AND (" +
+                "       inv.number LIKE \"%" + filter + "%\" OR " +
+                "       s.upper_name LIKE \"%" + filter.toUpperCase() + "%\" )" +
+                "GROUP BY inv.invoice_id" +
+                " ORDER BY inv.number ";
+
+        Cursor c = db.rawQuery(query, null);
+        return c;
+    }
+    public static Cursor getInvoiceById(Context context, int invoiceId) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.invoice_id AS _id, " +
+                "   inv.number, " +
+                "   inv.number_doc, " +
+                "   inv.provider_id, " +
+                "   p.name as provider_name, " +
+                "   p.code_EDRPOU as provider_code_EDRPOU, " +
+                "   inv.date_d, " +
+                "   inv.date_doc, " +
                 "   inv.invoice_type_id, " +
                 "   inv.created" +
                 " FROM invoices inv " +
@@ -447,18 +671,22 @@ public class SqlQuery {
         if(cursor.moveToFirst()) {
             int idColIndex = cursor.getColumnIndex("_id");
             int numberColIndex = cursor.getColumnIndex("number");
+            int numberDocColIndex = cursor.getColumnIndex("number_doc");
             int providerIdColIndex = cursor.getColumnIndex("provider_id");
             int nameColIndex = cursor.getColumnIndex("provider_name");
-            int codeColIndex = cursor.getColumnIndex("provider_code_EDRPOU");
+       //     int codeColIndex = cursor.getColumnIndex("provider_code_EDRPOU");
             int dateColIndex = cursor.getColumnIndex("date_d");
+            int dateDocColIndex = cursor.getColumnIndex("date_doc");
             int typeColIndex = cursor.getColumnIndex("invoice_type_id");
             int createdColIndex = cursor.getColumnIndex("created");
 
             invoice.setInvoiceId(Integer.parseInt(cursor.getString(idColIndex)));
             invoice.setNumberInvoice(cursor.getString(numberColIndex));
+            invoice.setNumberInvoiceProvider((cursor.getString(numberDocColIndex)));
             invoice.setNameProvider(cursor.getString(nameColIndex));
-            invoice.setCodeEDRPOU(cursor.getString(codeColIndex));
+       //     invoice.setCodeEDRPOU(cursor.getString(codeColIndex));
             invoice.setDateCreateInvoice(cursor.getString(dateColIndex));
+            invoice.setDateCreateInvoiceProvider(cursor.getString(dateDocColIndex));
             invoice.setProviderId(cursor.getInt(providerIdColIndex));
             invoice.setInvoiceTypeId(cursor.getInt(typeColIndex));
             invoice.setCreated(cursor.getInt(createdColIndex));
@@ -474,9 +702,12 @@ public class SqlQuery {
 
             ContentValues values = new ContentValues();
             values.put("number", invoice.getNumberInvoice());
+            values.put("invoice_code", invoice.getNumberInvoice());
             values.put("provider_id", invoice.getProviderId());
-            values.put("date_d", invoice.getDateCreateInvoice());
+            values.put("date_d", ReverseDate.getReverseDate(invoice.getDateCreateInvoice()));
             values.put("invoice_type_id", invoice.getInvoiceTypeId());
+            values.put("date_doc",ReverseDate.getReverseDate(invoice.getDateCreateInvoice()));
+            values.put("number_doc",invoice.getNumberInvoice());
             values.put("created", invoice.getCreated());
 
             invoice.setInvoiceId((int) db.insert("invoices", "", values));
@@ -510,11 +741,34 @@ public class SqlQuery {
 
     public static void updateInvoice(Context context, Invoice invoice){
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        db.execSQL("UPDATE invoices SET number = " + invoice.getNumberInvoice() + "," +
+/*        ContentValues cv = new ContentValues();
+        cv.put("number",invoice.getNumberInvoice() );
+        cv.put("number_doc",invoice.getNumberInvoiceProvider() );
+        cv.put("provider_id",invoice.getProviderId());
+        cv.put("date_d",invoice.getDateCreateInvoice() );
+        cv.put("date_doc",invoice.getDateCreateInvoiceProvider() );
+        cv.put("invoice_code",invoice.getNumberInvoice());
+        db.update("invoices",cv,"invoice_id = " + invoice.getInvoiceId(),null);*/
+        //db.execSQL("UPDATE invoices SET " );
+/*        db.execSQL("UPDATE invoices SET " +
+                " number = " + invoice.getNumberInvoice() + "," +
+                " number_doc = " + invoice.getNumberInvoiceProvider() + "," +
                 " provider_id = " + invoice.getProviderId()
                 + "," + "date_d = '" + invoice.getDateCreateInvoice() + "', " +
-                "invoice_code = " + invoice.getInvoiceCode()
-                + " WHERE invoice_id = " + invoice.getInvoiceId() + ";");
+                 "date_doc = '" + invoice.getDateCreateInvoiceProvider() + "', " +
+                " invoice_code = " + invoice.getNumberInvoice()
+                + " WHERE invoice_id = " + invoice.getInvoiceId() + ";");*/
+                db.execSQL("UPDATE invoices SET " +
+                " number = ?, number_doc = ?, provider_id = ?, date_d = ?, date_doc = ?, " +
+                        "invoice_code = ? " + " WHERE invoice_id = ? " + ";",
+                        new String[]{invoice.getNumberInvoice(),
+                                invoice.getNumberInvoiceProvider(),
+                                String.valueOf(invoice.getProviderId()),
+                                ReverseDate.getReverseDate(invoice.getDateCreateInvoice()),
+                                ReverseDate.getReverseDate(invoice.getDateCreateInvoiceProvider()),
+                                invoice.getNumberInvoice(),
+                                String.valueOf(invoice.getInvoiceId())
+                        });
         db.close();
 
     }
@@ -539,9 +793,9 @@ public class SqlQuery {
 
     public static Cursor searchProvider(Context context, int typeAgent, String filter){
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU " +
+        Cursor cursor = db.rawQuery("SELECT provider_id AS _id, name, code_EDRPOU, upper_name " +
                 "FROM providers " +
-                "WHERE (type_agent = " + typeAgent +  ") AND (name LIKE \"%" + filter + "%\" " +
+                "WHERE (type_agent = " + typeAgent +  ") AND (upper_name LIKE \"%" + filter.toUpperCase() + "%\" " +
                 "OR code_EDRPOU LIKE \"%" + filter + "%\" )" , null);
         return cursor;
     }
@@ -557,7 +811,11 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL("INSERT INTO exportBase.invoices SELECT * FROM invoices;");
+        db.execSQL("INSERT INTO exportBase.invoices(invoice_id, invoice_code, number, provider_id, " +
+                "date_d, number_doc, date_doc, invoice_type_id, created) " +
+                "SELECT invoice_id, invoice_code, number, provider_id, " +
+                "date_d, number_doc, date_doc, invoice_type_id, created " +
+                "FROM invoices;");
         db.execSQL("DETACH exportBase;");
     }
 
@@ -581,7 +839,9 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL("INSERT INTO exportBase.providers SELECT p.* " +
+        db.execSQL("INSERT INTO exportBase.providers(provider_id, provider_code, code_EDRPOU, name, type_agent) " +
+                " SELECT " +
+                " p.provider_id, p.provider_code, p.code_EDRPOU, p.name, p.type_agent " +
                 " FROM invoices inv " +
                 "      LEFT JOIN providers p ON (p.provider_id = inv.provider_id) " +
                 " GROUP BY inv.provider_id" );
@@ -596,12 +856,31 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL("INSERT INTO exportBase.articles SELECT a.* " +
+        db.execSQL("INSERT INTO exportBase.articles(article_id, article_code, " +
+                "code, name, unit_name, price, quantity_remains) " +
+                "SELECT a.article_id, a.article_code, a.code, a.name, a.unit_name, " +
+                " a.price, a.quantity_remains " +
                 " FROM invoice_rows inv " +
                 "      LEFT JOIN articles a ON (a.article_id = inv.article_id) " +
                 " GROUP BY a.article_id" );
         db.execSQL("DETACH exportBase;");
     }
+
+    public static void exportStoresByInvoice(Context context){
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String nameBD = preferences.getString("address_output","")+ "invoices_result.odf";
+        DBHelperResult dbHelperResult = new DBHelperResult(context, nameBD);
+        SQLiteDatabase sqLiteDatabaseResult = dbHelperResult.getWritableDatabase();
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL(" ATTACH DATABASE '" + nameBD + "' AS exportBase;");
+        db.execSQL(" INSERT INTO exportBase.stores(store_id, store_code, name) " +
+                " SELECT s.store_id, s.store_code, s.name " +
+                " FROM stores s ");
+        db.execSQL("DETACH exportBase;");
+    }
+
 
     public static void deleteInvoice(Context context, long id){
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
@@ -611,6 +890,12 @@ public class SqlQuery {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("DELETE FROM invoice_rows WHERE invoice_row_id = " + id + ";");
     }
+
+    public static void deleteInventories(Context context, long id){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        db.execSQL("DELETE FROM inventories WHERE inventory_id = " + id + ";");
+    }
+
 
     public static List<BarcodeTamplateInfo> getBarcodeTemplates(Context context){
 
@@ -636,7 +921,7 @@ public class SqlQuery {
     public static Cursor getPriceCheckItems(Context context){
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        String sqlQuery = " SELECT ab.barcode, a.code, a.name, a.unit_name, a.price, a.article_id AS _id" +
+        String sqlQuery = " SELECT ab.barcode, a.code, a.name, a.unit_name, a.price, a.price_out, a.article_id AS _id" +
         " FROM price_check pc " +
         "     LEFT JOIN articles a ON (a.article_id = pc.article_id) " +
         "     LEFT JOIN article_barcodes ab ON (ab.article_id = a.article_id) " +
@@ -677,10 +962,15 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL(" INSERT INTO exportBase.articles SELECT a.* " +
-                " FROM price_check pc " +
-                "     LEFT JOIN articles a ON (a.article_id = pc.article_id) " +
-                " GROUP BY pc.article_id " );
+
+        db.execSQL("INSERT INTO exportBase.articles(article_id, article_code, " +
+                "code, name, unit_name, price, quantity_remains) " +
+                "SELECT a.article_id, a.article_code, a.code, a.name, a.unit_name, " +
+                " a.price, a.quantity_remains " +
+                " FROM price_check pc" +
+                "      LEFT JOIN articles a ON (a.article_id = pc.article_id) " +
+                " GROUP BY pc.article_id" );
+
         db.execSQL("DETACH exportBase;");
     }
 
@@ -713,13 +1003,27 @@ public class SqlQuery {
 
     public static Cursor searchStores(Context context, String filter){
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT store_id AS _id, name " +
+        Cursor cursor = db.rawQuery("SELECT store_id AS _id, name, upper_name " +
                 "FROM stores " +
-                "WHERE name LIKE \"%" + filter + "%\" ", null);
+                "WHERE upper_name LIKE \"%" + filter.toUpperCase() + "%\" ", null);
         return cursor;
     }
 
     public static Cursor getInventoriesCursor(Context context) {
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
+                "   inv.number, " +
+                "   inv.store_id, " +
+                "   s.name as store_name, " +
+                "   inv.date_d, " +
+                "   inv.created" +
+                " FROM inventories inv " +
+                "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
+                " ORDER BY inv.number ", null);
+        return c;
+    }
+
+    public static Cursor getInventoriesCursorWithoutComplete(Context context) {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         Cursor c = db.rawQuery("SELECT inv.inventory_id AS _id, " +
                 "   inv.number, " +
@@ -900,7 +1204,7 @@ public class SqlQuery {
 
     public static Cursor getListInventoryAction(Context context, long id) {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor c = db.rawQuery(" SELECT inva.inventory_id AS _id, a.article_id, a.code, a.name AS article_name, a.unit_name AS article_unit_name, " +
+        Cursor c = db.rawQuery(" SELECT inva.inventory_id AS _id, a.article_id, a.code as article_code, a.name AS article_name, a.unit_name AS article_unit_name, " +
                 " inva.barcode, inva.inventory_action_id, inva.date_d, inva.time_t, inva.action_type_id AS type, " +
                 " (SELECT SUM(quantity_account) FROM inventory_rows WHERE inventory_id = inv.inventory_id AND article_id = a.article_id) as quantity, " +
                 " (SELECT SUM(quantity) FROM inventory_action WHERE inventory_id = inv.inventory_id AND article_id = a.article_id) as quantity_account " +
@@ -924,8 +1228,8 @@ public class SqlQuery {
                 "    LEFT JOIN inventory_rows invr ON (inv.inventory_id = invr.inventory_id) " +
                 "    LEFT JOIN inventory_action inva ON (inv.inventory_id = inva.inventory_id) " +
                 "    LEFT JOIN articles a ON (a.article_id = invr.article_id OR a.article_id = inva.article_id) " +
-                " WHERE (inv.inventory_id = " + inventoryId + ") AND (article_name  LIKE \"%" + filter + "%\"" +
-                " OR inva.barcode LIKE \"%" + filter + "%\")" +
+                " WHERE (inv.inventory_id = " + inventoryId + ") AND (upper_name  LIKE \"%" + filter.toUpperCase() + "%\"" +
+                " OR inva.barcode LIKE \"%" + filter + "%\" OR a.code LIKE \"%" + filter + "%\" )" +
                 " ORDER BY a.name", null);
         return c;
     }
@@ -981,7 +1285,7 @@ public class SqlQuery {
                 " FROM inventories inv " +
                 "   LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
                 " WHERE inv.number LIKE \"%" + filter + "%\" OR " +
-                "       s.name  LIKE \"%" + filter + "%\"" +
+                "       s.upper_name LIKE \"%" + filter.toUpperCase() + "%\"" +
                 " ORDER BY inv.number ", null);
 
         return c;
@@ -1000,7 +1304,7 @@ public class SqlQuery {
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
         db.execSQL("INSERT INTO exportBase.inventories SELECT * FROM inventories;");
-        db.execSQL("DETACH exportBase;");
+        db.execSQL("DETACH exportBase;e");
     }
 
     public static void exportInventoryAction(Context context){
@@ -1038,12 +1342,16 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL(" ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL(" INSERT INTO exportBase.stores SELECT s.* " +
+        db.execSQL(" INSERT INTO exportBase.stores(store_id, store_code, name) " +
+                " SELECT s.store_id, s.store_code, s.name " +
                 " FROM inventories inv " +
                 "      LEFT JOIN stores s ON (s.store_id = inv.store_id) " +
                 " GROUP BY inv.store_id; ");
         db.execSQL("DETACH exportBase;");
     }
+
+
+
 
     public static void exportArticlesInventory(Context context){
 
@@ -1054,7 +1362,10 @@ public class SqlQuery {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
         db.execSQL("ATTACH DATABASE '" + nameBD + "' AS exportBase;");
-        db.execSQL(" INSERT INTO exportBase.articles SELECT a.* " +
+        db.execSQL(" INSERT INTO exportBase.articles(article_id, article_code, " +
+                "code, name, unit_name, price, quantity_remains) " +
+                " SELECT a.article_id, a.article_code, a.code, a.name, a.unit_name, " +
+                " a.price, a.quantity_remains " +
                 " FROM inventories inv  " +
                 "    LEFT JOIN inventory_rows invr ON (inv.inventory_id = invr.inventory_id)  " +
                 "    LEFT JOIN inventory_action inva ON (inv.inventory_id = inva.inventory_id)  " +
@@ -1074,7 +1385,21 @@ public class SqlQuery {
     public static Cursor getSumInvoiceItem(Context context, int invoiceId) {
 
         SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
-        Cursor c = db.rawQuery("Select SUM(quantity) as sum_quantity, SUM(quantity_account) AS sum_quantity_account " +
+        Cursor c = db.rawQuery("Select SUM(quantity) as sum_quantity, " +
+                " SUM(quantity_account) AS sum_quantity_account,  " +
+                " SUM(ir.correction_type_id) AS type " +
+                " FROM invoice_rows ir " +
+                " WHERE ir.invoice_id = " + invoiceId , null);
+
+        return c;
+    }
+
+
+    public static Cursor getSumInvoice(Context context, long invoiceId) {
+
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("Select SUM(quantity) AS sum_quantity, SUM(suma_account) AS suma_account," +
+                " SUM(quantity_account) AS sum_quantity_account, SUM(suma) AS suma " +
                 " FROM invoice_rows ir " +
                 " WHERE ir.invoice_id = " + invoiceId , null);
 
@@ -1103,5 +1428,57 @@ public class SqlQuery {
                 return true;
         }else
         return true;
+    }
+    public static void createSql(SQLiteDatabase db, Context context){
+
+   //     SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+
+        Cursor c =  db.rawQuery("SELECT COUNT(*) AS count FROM sqlite_master WHERE type='table' AND name='article_barcodes';", null);
+        c.moveToFirst();
+        int count = c.getInt(c.getColumnIndex("count"));
+
+        if(count == 0) {
+            ReadFileFromRecource readFileFromRecource = new ReadFileFromRecource();
+            String query = readFileFromRecource.getStringFromRawFile(context);
+            String[] queryString = query.split("\\r?\\n");
+            for (int i = 0; i < queryString.length; i++) {
+                db.execSQL(queryString[i]);
+            }
+        }
+
+    }
+
+
+    public static void upperCase(Context context){
+        SQLiteDatabase db = newDBHelper(context).getWritableDatabase();
+        Cursor c = db.rawQuery("Select *"+
+                " FROM articles " , null);
+        c.moveToFirst();
+        do {
+            db.execSQL(" UPDATE articles SET upper_name = " +
+                     "\"" + c.getString(c.getColumnIndex("name")).toUpperCase() + "\""+
+                    " WHERE article_id = " + c.getInt(c.getColumnIndex("article_id")));
+        }
+        while (c.moveToNext());
+
+        c = db.rawQuery("Select *"+
+                " FROM providers " , null);
+        c.moveToFirst();
+        do {
+            db.execSQL(" UPDATE providers SET upper_name = " +
+                    "\"" + c.getString(c.getColumnIndex("name")).toUpperCase() + "\""+
+                    " WHERE provider_id = " + c.getInt(c.getColumnIndex("provider_id")));
+        }
+        while (c.moveToNext());
+
+        c = db.rawQuery("Select *"+
+                " FROM stores " , null);
+        c.moveToFirst();
+        do {
+            db.execSQL(" UPDATE stores SET upper_name = " +
+                    "\"" + c.getString(c.getColumnIndex("name")).toUpperCase() + "\""+
+                    " WHERE store_id = " + c.getInt(c.getColumnIndex("store_id")));
+        }
+        while (c.moveToNext());
     }
 }

@@ -31,6 +31,9 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import static com.example.vitaminjr.mobileacounting.Preferences.loadBooleanSetting;
+import static com.example.vitaminjr.mobileacounting.Preferences.saveBooleanSetting;
+
 /**
  * Created by vitaminjr on 06.07.16.
  */
@@ -170,11 +173,16 @@ public class InventoryActivity extends AppCompatActivity implements OnEventListe
                 mCursor.moveToFirst();
             }
         }
-        return mCursor;
+         return mCursor;
     }
 
     @Override
     public void someEvent(ListViewInventoryAdapter adapter) {
         listViewAdapter = adapter;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -51,10 +51,10 @@ public class DatePickerDialogFragment extends DialogFragment {
             dayInvoice = dayOfMonth;
             Intent intent = new Intent();
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
 
-            String s = dayInvoice + "-" + monthInvoice + "-" + yearInvoice;
+            String s = yearInvoice + "-" + monthInvoice + "-" + dayInvoice;
 
             try {
                 date = dateFormat.parse(s);

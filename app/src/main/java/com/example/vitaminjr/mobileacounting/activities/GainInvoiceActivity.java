@@ -3,24 +3,31 @@ package com.example.vitaminjr.mobileacounting.activities;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
+import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.FilterQueryProvider;
 import android.widget.Toast;
 
+import com.example.vitaminjr.mobileacounting.Preferences;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.fragments.DatePickerDialogFragment;
 import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceFragment;
 import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
@@ -30,17 +37,21 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import static com.example.vitaminjr.mobileacounting.Preferences.loadBooleanSetting;
+import static com.example.vitaminjr.mobileacounting.Preferences.saveBooleanSetting;
+
 /**
  * Created by vitaminjr on 07.07.16.
  */
-public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEventListener {
+public class GainInvoiceActivity extends AppCompatActivity {
 
     private final int CREATE_GAIN = 1;
     private final int EXPORT = 2;
     SearchView searchView;
-    ListViewAdapter listViewAdapter;
     GainInvoiceFragment gainInvoiceFragment;
     public Toolbar toolbar;
+    private static final int REQUEST_PROVIDER = 1;
+    MenuItem itemCheck = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,7 +115,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
             return;
         }
         super.onBackPressed();
-
     }
 
     public void initEditActivity() {
@@ -115,30 +125,75 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_search, menu);
+        getMenuInflater().inflate(R.menu.search_and_check, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) searchItem.getActionView();
         setSearchView();
+        MenuItem checkBoxItem = menu.findItem(R.id.hide_invoice);
+        checkBoxItem.setChecked(loadBooleanSetting("isHideInvoice",getApplicationContext()));
+
+        MenuItem searchPrpvider = menu.findItem(R.id.search_provider_invoice);
+
         return super.onCreateOptionsMenu(menu);
     }
 
+
     @Override
-    public void someEvent(ListViewAdapter adapter) {
-        listViewAdapter = adapter;
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId()==R.id.hide_invoice){
+            if(item.isChecked()==false) {
+                itemCheck = item;
+                item.setChecked(true);
+                item.setTitle("Показати зібрані");
+            }
+            else {
+                item.setTitle("Приховати зібрані");
+                item.setChecked(false);
+            }
+
+            saveBooleanSetting("isHideInvoice",item.isChecked(),getApplicationContext());
+            gainInvoiceFragment.updateAdapter();
+
+        }
+
+        if(item.getItemId()==R.id.search_provider_invoice) {
+            Intent intent = new Intent(this,ListProviderInvoiceActivity.class);
+            intent.putExtra("typeAgent",0);
+            if(itemCheck != null) {
+                itemCheck.setChecked(false);
+                itemCheck.setTitle("Приховати зібрані");
+            }
+            startActivityForResult(intent,REQUEST_PROVIDER);
+        }
+        if(item.getItemId() == R.id.clear_filter){
+            gainInvoiceFragment.updateAdapter();
+            if(itemCheck != null) {
+                itemCheck.setChecked(false);
+                itemCheck.setTitle("Приховати зібрані");
+                saveBooleanSetting("isHideInvoice", itemCheck.isChecked(), getApplicationContext());
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
+
 
     private Cursor getCursor(String str) {
         Cursor mCursor = null;
         if (str == null  ||  str.length () == 0)  {
-            mCursor = SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.profit.ordinal());
+            if(Preferences.loadBooleanSetting("isHideInvoice",getApplicationContext())==false)
+                mCursor = SqlQuery.getCursorListInvoices(getApplicationContext(), InvoiceType.profit.ordinal());
+            else
+                mCursor = SqlQuery.getCursorListInvoicesWithoutComplete(getApplicationContext(), InvoiceType.profit.ordinal());
         }
         else {
-            mCursor = SqlQuery.searchInvoice(this, str, InvoiceType.profit.ordinal());
-
-            if (mCursor != null) {
-                mCursor.moveToFirst();
-            }
+            if(Preferences.loadBooleanSetting("isHideInvoice",getApplicationContext())==false)
+                mCursor = SqlQuery.searchInvoice(this, str, InvoiceType.profit.ordinal());
+            else
+                mCursor = SqlQuery.searchInvoiceWithoutComplete(this, str, InvoiceType.profit.ordinal());
         }
+        Log.d("counter", "Кількість" + mCursor.getCount());
         return mCursor;
     }
 
@@ -148,8 +203,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
         if (null != searchManager) {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         }
-        searchView.setIconifiedByDefault(false);
-
 
         gainInvoiceFragment.adapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
@@ -163,7 +216,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
             @Override
             public boolean onQueryTextSubmit(String query) {
                 gainInvoiceFragment.adapter.getFilter().filter(checkFilter(query,searchView));
-                gainInvoiceFragment.adapter.notifyDataSetChanged();
                 return true;
             }
 
@@ -183,7 +235,6 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
             @Override
             public boolean onQueryTextChange(String newText) {
                 gainInvoiceFragment.adapter.getFilter().filter(checkFilter(newText,searchView));
-                gainInvoiceFragment.adapter.notifyDataSetChanged();
                 return true;
             }
         });
@@ -191,10 +242,28 @@ public class GainInvoiceActivity extends AppCompatActivity implements OnSomeEven
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus)
-                    listViewAdapter.setCursor(SqlQuery.getCursorListInvoices(getApplicationContext(),InvoiceType.profit.ordinal()));
+                if (!hasFocus) {
+                        gainInvoiceFragment.adapter.swapCursor(gainInvoiceFragment.setDataFromDBAdapter());
+                }
             }
         });
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == AppCompatActivity.RESULT_OK)
+        {
+            switch (requestCode){
+                case REQUEST_PROVIDER:
+                    long idProvider = data.getLongExtra(ListProviderInvoiceActivity.TAG_PROVIDER_ID,-1);
+                    Cursor cursor = SqlQuery.getCursorListInvoicesByProvider(getApplicationContext(),idProvider,InvoiceType.profit.ordinal());
+                    gainInvoiceFragment.setCursor(cursor);
+                    break;
+            }
+        }
+    }
+
 
 }

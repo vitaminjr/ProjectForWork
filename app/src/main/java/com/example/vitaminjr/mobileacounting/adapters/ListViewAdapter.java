@@ -9,9 +9,13 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import com.example.vitaminjr.mobileacounting.Preferences;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
+import com.example.vitaminjr.mobileacounting.helpers.ReverseDate;
 
 /**
  * Created by vitaminjr on 07.07.16.
@@ -63,7 +67,7 @@ public class ListViewAdapter extends CursorAdapter{
 
             holder.numbTextView.setText(cursor.getString(numbColIndex));
             holder.provTextView.setText(cursor.getString(provColIndex));
-            holder.dateTextView.setText(cursor.getString(dateColIndex));
+            holder.dateTextView.setText(ReverseDate.getDate(cursor.getString(dateColIndex)));
 
             if (cursor.getInt(createColIndex) == CreateType.pc.ordinal()) {
 
@@ -73,16 +77,18 @@ public class ListViewAdapter extends CursorAdapter{
 
                 int quantityColIndex = cursorArticles.getColumnIndex("sum_quantity");
                 int quantityAccountColIndex = cursorArticles.getColumnIndex("sum_quantity_account");
+                int typeIndex = cursorArticles.getColumnIndex("type");
 
-                if (cursorArticles.getFloat(quantityColIndex) != cursorArticles.getFloat(quantityAccountColIndex)) {
+                if (cursorArticles.getInt(typeIndex) == CorrectionType.ctNone.ordinal()) {
+                    view.setBackgroundResource(R.drawable.rect_without_radius_count_is_yellow);
+                }else if (cursorArticles.getFloat(quantityColIndex) != cursorArticles.getFloat(quantityAccountColIndex)) {
                     view.setBackgroundResource(R.drawable.rect_without_radius_count_is_red);
-                } else
+                }else
                     view.setBackgroundResource(R.drawable.rect_without_radius_count_is_green);
-            }else
+            } else
                 view.setBackgroundResource(R.drawable.rect_without_radius_count_is_white);
         }
     }
-
 
     static class ViewHolder {
         TextView numbTextView;

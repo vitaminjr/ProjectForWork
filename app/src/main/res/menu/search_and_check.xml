@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yourapp="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools">
+
+
+    <item
+        android:id="@+id/action_search"
+        android:title="@android:string/search_go"
+        android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
+        yourapp:showAsAction="always|collapseActionView"
+        yourapp:actionViewClass="android.support.v7.widget.SearchView"
+
+        />
+
+    <item
+        android:id="@+id/hide_invoice"
+        android:checkable="true"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="Приховати зібрані"
+        />
+    <item
+        android:id="@+id/search_provider_invoice"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="Постачальник"
+        />
+
+    <item
+        android:id="@+id/clear_filter"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="Скинути фільтри"
+        />
+
+
+</menu>

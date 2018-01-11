@@ -16,8 +16,15 @@ public class InvoiceRow extends Article {
     private float sumaAccount;
     private int correctionTypeId;
     private String dateTimeChange;
+    private float priceOut;
 
+    public float getPriceOut() {
+        return priceOut;
+    }
 
+    public void setPriceOut(float priceOut) {
+        this.priceOut = priceOut;
+    }
 
     public InvoiceRow() {
         clear();
@@ -154,5 +161,6 @@ public class InvoiceRow extends Article {
         sumaAccount = 0;
         correctionTypeId = 0;
         dateTimeChange = "";
+        priceOut = 0;
     }
 }

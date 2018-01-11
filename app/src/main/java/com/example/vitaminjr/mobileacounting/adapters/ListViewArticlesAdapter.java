@@ -58,7 +58,8 @@ public class ListViewArticlesAdapter extends CursorAdapter {
         ViewHolder holder = new ViewHolder(view);
 
         if(holder != null) {
-            holder.nameTextView.setText(cursor.getString(cursor.getColumnIndex("article_name")));
+            String code = cursor.getString(cursor.getColumnIndex("article_code"));
+            holder.nameTextView.setText(code + " - " + cursor.getString(cursor.getColumnIndex("article_name")));
             holder.codeTextView.setText(cursor.getString(cursor.getColumnIndex("barcode")));
             holder.countTextView.setText(String.format("%.3f", cursor.getFloat(cursor.getColumnIndex("quantity_account"))));
             holder.unitTextView.setText(cursor.getString(cursor.getColumnIndex("article_unit_name")));

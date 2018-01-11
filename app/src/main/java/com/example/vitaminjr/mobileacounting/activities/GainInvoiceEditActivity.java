@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
@@ -41,6 +42,7 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
     private final int EXPORT = 4;
     public final static String NUMBER = "numberInvoice";
     public final static String TYPE = "CorrectionType";
+    public final static String INVOICE_TYPE = "invoiceType";
     public final static String IDINVOICE = "InvoiceId";
     public final static String CREATED = "created";
     FragmentTransaction fragmentTransaction;
@@ -53,8 +55,11 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
     Intent editArticlesIntent;
     Button buttonNextView;
     Button buttonPrevView;
+    ImageView buttonEdit;
     int invoiceTypeId;
     private int created;
+    int position;
+    GainInvoiceEditFragment gainInvoiceEditFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,6 +72,7 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
     public void initGui(){
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_gain_edit);
+        buttonEdit  = (ImageView) findViewById(R.id.button_edit);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -80,16 +86,20 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
         initFooterButton();
         if(longInvoiceId == 0) {
             fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            GainInvoiceEditFragment gainInvoiceEditFragment = GainInvoiceEditFragment.newInstance(invoiceTypeId);
+            gainInvoiceEditFragment = GainInvoiceEditFragment.newInstance(invoiceTypeId);
             fragmentTransaction.replace(R.id.add_invoice_container, gainInvoiceEditFragment);
             fragmentTransaction.commit();
 
         }else {
             invoiceList = SqlQuery.getListInvoices(SqlQuery.getCursorListInvoices(this, invoiceTypeId));
+            for (int i = 0; i < invoiceList.size(); i++) {
+                if(invoiceList.get(i).getInvoiceId()==longInvoiceId)
+                    position = i;
+            }
 
-            int position = intent.getIntExtra("position",0);
             initViewPager(position, invoiceList);
         }
+        clickEditButton();
     }
 
     public void initViewPager(int position, List<Invoice> list){
@@ -124,35 +134,31 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
 
                         if(drawerItem != null) {
-                            if(invoiceList!=null) {
-                                numberInvoiceGain = invoiceList.get(articlesPager.getCurrentItem()).getNumberInvoice();
-                                invoiceId = invoiceList.get(articlesPager.getCurrentItem()).getInvoiceId();
-                                created = invoiceList.get(articlesPager.getCurrentItem()).getCreated();
-                            }
-                            else
-                            {
-                                Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getApplicationContext(), GainInvoiceEditFragment.idInvoiceforActivity));
-                                numberInvoiceGain = invoice.getNumberInvoice();
-                                invoiceId = invoice.getInvoiceId();
-                                created = invoice.getCreated();
-                            }
-
+                            getInvoice();
                             switch (drawerItem.getIdentifier()) {
 
                                 case EDIT:
 
-                                    if(invoiceId == 0 )
-                                        Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
-                                    else if(created == CreateType.pc.ordinal())
-                                            initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
-                                         else
+                                    if(invoiceId == 0 ) {
+                                        if(gainInvoiceEditFragment.saveInvoice()==true){
+                                            getInvoice();
                                             initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                        }
+                                    }
+                                    else if(created == CreateType.pc.ordinal())
+                                        initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                    else
+                                        initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
                                     break;
 
                                 case REVISION:
 
-                                    if(invoiceId == 0 )
-                                        Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
+                                    if(invoiceId == 0 ) {
+                                        if(gainInvoiceEditFragment.saveInvoice()==true){
+                                            getInvoice();
+                                            initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                                        }
+                                    }
                                     else if(created == CreateType.pc.ordinal())
                                             initIntent(CorrectionType.ctCollate.ordinal(),GainInvoiceEditArticlesActivity.class);
                                          else
@@ -161,8 +167,12 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
 
                                 case REVISIONLIST:
 
-                                    if(invoiceId == 0 )
-                                        Toast.makeText(getApplicationContext(),"Збережіть накладну",Toast.LENGTH_SHORT).show();
+                                    if(invoiceId == 0 ) {
+                                        if(gainInvoiceEditFragment.saveInvoice()==true){
+                                            getInvoice();
+                                            initIntent(CorrectionType.ctUpdate.ordinal(),ListArticlesInvoiceActivity.class);
+                                        }
+                                    }
                                     else if(created == CreateType.pc.ordinal())
                                             initIntent(CorrectionType.ctCollate.ordinal(),ListArticlesInvoiceActivity.class);
                                          else
@@ -225,16 +235,53 @@ public class GainInvoiceEditActivity extends AppCompatActivity {
         }
 
         else {
-            findViewById(R.id.button_layout).setVisibility(View.GONE);
+            findViewById(R.id.button_prev_fragment).setVisibility(View.GONE);
+            findViewById(R.id.button_next_fragment).setVisibility(View.GONE);
         }
     }
      public void initIntent(int type, Class typeClass){
          editArticlesIntent = new Intent(getApplicationContext(),typeClass);
+         editArticlesIntent.putExtra(INVOICE_TYPE,invoiceTypeId);
          editArticlesIntent.putExtra(NUMBER,numberInvoiceGain);
          editArticlesIntent.putExtra(TYPE, type);
          editArticlesIntent.putExtra(IDINVOICE,invoiceId);
          editArticlesIntent.putExtra(CREATED,created);
          startActivity(editArticlesIntent);
      }
+
+    public void clickEditButton(){
+        buttonEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getInvoice();
+                if(invoiceId == 0 ) {
+                    if(gainInvoiceEditFragment.saveInvoice()==true){
+                        getInvoice();
+                        initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
+                    }
+                }
+                else if(created == CreateType.pc.ordinal())
+                    initIntent(CorrectionType.ctUpdate.ordinal(),GainInvoiceEditArticlesActivity.class);
+                else
+                    initIntent(CorrectionType.ctInsert.ordinal(),GainInvoiceEditArticlesActivity.class);
+            }
+        });
+    }
+
+    public void getInvoice(){
+
+        if(invoiceList!=null) {
+            numberInvoiceGain = invoiceList.get(articlesPager.getCurrentItem()).getNumberInvoice();
+            invoiceId = invoiceList.get(articlesPager.getCurrentItem()).getInvoiceId();
+            created = invoiceList.get(articlesPager.getCurrentItem()).getCreated();
+        }
+        else
+        {
+            Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getApplicationContext(), GainInvoiceEditFragment.idInvoiceforActivity));
+            numberInvoiceGain = invoice.getNumberInvoice();
+            invoiceId = invoice.getInvoiceId();
+            created = invoice.getCreated();
+        }
+    }
 
 }

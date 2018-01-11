@@ -14,7 +14,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/ThemeLight"
-        android:windowSoftInputMode="adjustPan">
+        android:windowSoftInputMode="adjustPan"
+        android:screenOrientation="portrait">
         <activity android:name="com.example.vitaminjr.mobileacounting.activities.MainActivity"
             >
             <intent-filter>
@@ -113,9 +114,9 @@
             android:label= "Розбиття">
         </activity>
 
-
-
-
+        <activity android:name="com.example.vitaminjr.mobileacounting.activities.MoveInvoiceActivity"
+            android:label= "Переміщення">
+        </activity>
 
 
         <meta-data

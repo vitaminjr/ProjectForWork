@@ -34,13 +34,15 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
     private int correctionType;
     private int idInvoice;
     private int created;
+    private int invoiceTypeId;
     public boolean leftButton = false;
     public boolean rightButton = false;
 
 
     public ViewPager articlesPager;
     public ArticlesPagerAdapter pagerAdapter;
-
+    Button buttonNextView;
+    Button buttonPrevView;
     public final static int insert = 1;
     public final static int update = 2;
     public final static int collate = 4;
@@ -58,6 +60,7 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
         correctionType = intent.getIntExtra(GainInvoiceEditActivity.TYPE, 0);
         idInvoice = intent.getIntExtra(GainInvoiceEditActivity.IDINVOICE,0);
         created = intent.getIntExtra(GainInvoiceEditActivity.CREATED,-1);
+        invoiceTypeId = intent.getIntExtra(GainInvoiceEditActivity.INVOICE_TYPE,-1);
         initFooterButton();
         switch (correctionType) {
             case insert :
@@ -77,7 +80,7 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
 
     public void startFragment(){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        GainInvoiceEditArticlesFragment articlesFragment = GainInvoiceEditArticlesFragment.newInstance(invoiceNumber, correctionType, idInvoice,created);
+        GainInvoiceEditArticlesFragment articlesFragment = GainInvoiceEditArticlesFragment.newInstance(invoiceNumber, correctionType, idInvoice, created, invoiceTypeId);
         fragmentTransaction.add(R.id.edit_invoice_article_container, articlesFragment);
         fragmentTransaction.commit();
     }
@@ -117,8 +120,16 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
     public void initViewPager() {
 
         articlesPager = (ViewPager) findViewById(R.id.activity_edit_articles_invoice_pager);
+        articlesPager.setOffscreenPageLimit(1);
+
         pagerAdapter = new ArticlesPagerAdapter(getSupportFragmentManager(), SqlQuery.getInvoiceRowCount(idInvoice,this),idInvoice, invoiceNumber,created);
         articlesPager.setAdapter(pagerAdapter);
+
+        if(pagerAdapter.getCount()==1){
+            buttonNextView.setEnabled(false);
+            buttonPrevView.setEnabled(false);
+        }
+
 
     }
 
@@ -126,8 +137,8 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
         if(correctionType == CorrectionType.ctCollate.ordinal()
                 || (created == CreateType.device.ordinal()
                 && correctionType == CorrectionType.ctUpdate.ordinal())) {
-            final Button buttonNextView = (Button) findViewById(R.id.button_next_fragment);
-            final Button buttonPrevView = (Button) findViewById(R.id.button_prev_fragment);
+            buttonNextView = (Button) findViewById(R.id.button_next_fragment);
+            buttonPrevView = (Button) findViewById(R.id.button_prev_fragment);
             buttonNextView.clearFocus();
             buttonPrevView.clearFocus();
             buttonPrevView.setEnabled(false);
@@ -135,16 +146,18 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
             buttonPrevView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    leftButton = true;
-                    rightButton = false;
-                    pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).updateInvoiceRowWithCondition();
-                    buttonNextView.setEnabled(true);
-                    if(pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).isOnCreateDialog == false)
-                        articlesPager.setCurrentItem(articlesPager.getCurrentItem() - 1);
-                    pagerAdapter.notifyDataSetChanged();
+                    if (pagerAdapter.getCount() != 0) {
+                        leftButton = true;
+                        rightButton = false;
+                        pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).updateInvoiceRowWithCondition();
+                        buttonNextView.setEnabled(true);
+                        if (pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).isOnCreateDialog == false)
+                            articlesPager.setCurrentItem(articlesPager.getCurrentItem() - 1);
+                        pagerAdapter.notifyDataSetChanged();
 
-                    if(articlesPager.getCurrentItem()==0){
-                        buttonPrevView.setEnabled(false);
+                        if (articlesPager.getCurrentItem() == 0) {
+                            buttonPrevView.setEnabled(false);
+                        }
                     }
                 }
             });
@@ -152,17 +165,21 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
             buttonNextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    rightButton = true;
-                    leftButton = false;
-                    buttonPrevView.setEnabled(true);
-                    pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).updateInvoiceRowWithCondition();
+                    if (pagerAdapter.getCount() != 0) {
+                        rightButton = true;
+                        leftButton = false;
+                        buttonPrevView.setEnabled(true);
+                        if (articlesPager.getCurrentItem() != 0) {
+                            pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).updateInvoiceRowWithCondition();
+                        }
 
-                    if(pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).isOnCreateDialog == false)
-                        articlesPager.setCurrentItem(articlesPager.getCurrentItem() + 1);
-                    pagerAdapter.notifyDataSetChanged();
-                    Log.d("countItem", String.valueOf(articlesPager.getCurrentItem()));
-                    if(pagerAdapter.getCount()==articlesPager.getCurrentItem()+1){
-                        buttonNextView.setEnabled(false);
+                        if (pagerAdapter.getListFragment().get(articlesPager.getCurrentItem()).isOnCreateDialog == false)
+                            articlesPager.setCurrentItem(articlesPager.getCurrentItem() + 1);
+                        pagerAdapter.notifyDataSetChanged();
+                        Log.d("countItem", String.valueOf(articlesPager.getCurrentItem()));
+                        if (pagerAdapter.getCount() == articlesPager.getCurrentItem() + 1) {
+                            buttonNextView.setEnabled(false);
+                        }
                     }
                 }
             });
@@ -178,17 +195,19 @@ public class GainInvoiceEditArticlesActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         OnBackPressedListener backPressedListener = null;
 
-        for (Fragment fragment: fm.getFragments()) {
-            if (fragment instanceof  OnBackPressedListener) {
-                backPressedListener = (OnBackPressedListener) fragment;
-                break;
-            }
-        }
-
         if (backPressedListener != null) {
             backPressedListener.onBackPressed();
         } else {
             super.onBackPressed();
+        }
+
+        if (fm.getFragments()!= null) {
+            for (Fragment fragment : fm.getFragments()) {
+                if (fragment instanceof OnBackPressedListener) {
+                    backPressedListener = (OnBackPressedListener) fragment;
+                    break;
+                }
+            }
         }
     }
 

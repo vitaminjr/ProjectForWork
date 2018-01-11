@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:hint="@string/barcode"
         android:id="@+id/edit_text_barcode_price_check"
-        android:inputType="text"
+        android:inputType="phone"
         android:textSize="20dp"
         android:layout_height="49dp"
         android:layout_margin="5dp"
@@ -118,6 +118,7 @@
                 android:enabled="false"
                 android:layout_height="49dp"
                 android:gravity="center"
+                android:inputType="numberDecimal"
                 style="@style/editStyle2"
                 />
         </LinearLayout>

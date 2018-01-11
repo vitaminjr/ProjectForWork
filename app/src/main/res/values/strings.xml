@@ -9,6 +9,7 @@
   <string name="inventory">Інвентаризація</string>
 
   <string name="expense">Видаткова накладна</string>
+  <string name="move">Переміщення</string>
   <string name="clean">Очистка</string>
   <string name="input">Введення</string>
   <string name="gain">Прибуткова накладна</string>
@@ -20,6 +21,7 @@
 
   <string name="provider">Постачальник: </string>
   <string name="customer">Покупець: </string>
+  <string name="storage">Склад: </string>
   <string name="choice">Обрати</string>
   <string name="date">Дата</string>
   <string name="name">Назва </string>
@@ -31,7 +33,7 @@
   <string name="price">Ціна</string>
   <string name="barcode">Штрихкод</string>
   <string name="unit">Од.Вим</string>
-  <string name="count">Кількість</string>
+
   <string name="find">Знайти товар</string>
   <string name="action_previous">Попередній</string>
   <string name="subdivision">Підрозділ</string>
@@ -49,11 +51,13 @@
   <string name="saved">Збережено</string>
   <string name="created">створено</string>
   <string name="warning">Попередження</string>
-  <string name="register">Зареєструвати</string>
-  <string name="unregister_version">Демонстраційна версія</string>
   <string name="exit">Вихід</string>
   <string name="key">Ключ</string>
+  <string name="register">Зареєструвати</string>
+  <string name="unregister_version">Демонстраційна версія</string>
   <string name="code_register">Код Реєстрації</string>
+  <string name="sum">Сума</string>
+  <string name="count">Кількість</string>
 
 
 

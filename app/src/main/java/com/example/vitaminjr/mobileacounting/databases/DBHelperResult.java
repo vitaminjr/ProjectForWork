@@ -26,6 +26,8 @@ public class DBHelperResult extends SQLiteOpenHelper {
                 " number           varchar(50), " +
                 " provider_id      integer, " +
                 " date_d           date, " +
+                " number_doc           varchar(50), " +
+                " date_doc           date, " +
                 " invoice_type_id  integer, " +
                 " created          integer DEFAULT 0); ");
 
@@ -57,7 +59,13 @@ public class DBHelperResult extends SQLiteOpenHelper {
                 " name              varchar(100), " +
                 " unit_name         varchar(20), " +
                 " price             float(15,3), " +
-                " quantity_remains  float(15,3));");
+                " price_out             float(15,3), " +
+                " quantity_remains  float(15,3)); ");
+
+        db.execSQL("CREATE TABLE stores (" +
+                "store_id  integer PRIMARY KEY AUTOINCREMENT," +
+                "store_code  varchar(50)," +
+                "name       varchar(50) " + ");");
 
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  articles_index0 ON articles(article_id);");
         db.execSQL("CREATE INDEX IF NOT EXISTS  articles_Index01 ON articles(article_code);");

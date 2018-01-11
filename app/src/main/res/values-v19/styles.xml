@@ -1,7 +1,7 @@
 <resources xmlns:android="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="AppTheme.Light">
+    <style name="AppTheme" parent="android:Theme">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="android:textColor">@color/black</item>

@@ -34,15 +34,16 @@
 
     <EditText
         android:layout_width="match_parent"
-        android:layout_gravity="center"
-        android:hint="@string/barcode"
-        android:id="@+id/edit_text_barcode_invoice"
-        android:inputType="none"
-        android:textSize="20dp"
         android:layout_height="49dp"
+        android:id="@+id/edit_text_barcode_invoice"
+        android:hint="@string/barcode"
+        android:inputType="phone"
+        android:textSize="20dp"
+        android:layout_gravity="center"
         android:layout_margin="5dp"
         android:background="@drawable/rect"
         android:gravity="center"
+        android:digits="0,1,2,3,4,5,6,7,8,9,*"
         android:textColor="@color/text_color"
 
         />
@@ -159,7 +160,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -167,13 +169,14 @@
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginRight="32dp">
+            android:layout_marginRight="37dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:textSize="20dp"
                 android:layout_height="wrap_content"
                 android:text="@string/price"
+                android:minWidth="68dp"
                 />
 
             <EditText
@@ -200,13 +203,14 @@
             android:layout_alignParentEnd="true"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginRight="38dp">
+            android:layout_marginRight="37dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Сума"
                 android:layout_gravity="center"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                android:minWidth="68dp"/>
 
             <TextView
                 android:layout_width="wrap_content"

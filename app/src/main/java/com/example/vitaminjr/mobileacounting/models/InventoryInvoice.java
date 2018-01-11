@@ -1,5 +1,10 @@
 package com.example.vitaminjr.mobileacounting.models;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by vitaminjr on 12.09.16.
  */
@@ -83,4 +88,34 @@ public class InventoryInvoice {
     public void setCreated(int created) {
         this.created = created;
     }
+
+    public void setCurrentDate(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+
+
+        String sDate = dateFormat.format(date);
+        setDate(sDate);
+    }
+
+    public boolean isBackPattern(String date){
+        int count = 0;
+        try {
+            char[] ch = date.toCharArray();
+
+            if(ch[4] == '-'){
+                count ++;
+            }
+            if(ch[7] == '-'){
+                count ++;
+            }
+
+            if(count == 2)
+                return true;
+        }catch (Exception ex){
+            return false;
+        }
+        return false;
+    }
+
 }

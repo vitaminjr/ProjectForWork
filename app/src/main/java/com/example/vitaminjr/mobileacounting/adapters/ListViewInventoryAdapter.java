@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.ReverseDate;
 
 /**
  * Created by vitaminjr on 07.07.16.
@@ -66,7 +67,7 @@ public class ListViewInventoryAdapter extends CursorAdapter {
 
         numbTextView.setText(cursor.getString(cursor.getColumnIndex("number")));
         storeTextView.setText(cursor.getString(cursor.getColumnIndex("store_name")));
-        dateTextView.setText(cursor.getString(cursor.getColumnIndex("date_d")));
+        dateTextView.setText(ReverseDate.getDate(cursor.getString(cursor.getColumnIndex("date_d"))));
     }
 
 

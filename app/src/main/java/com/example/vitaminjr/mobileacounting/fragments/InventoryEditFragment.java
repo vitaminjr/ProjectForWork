@@ -25,6 +25,7 @@ import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.activities.ListStoresActivity;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.ReverseDate;
 import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
@@ -43,7 +44,7 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
     private final int DEFAULT_ID_STORE = 0;
     private static final int REQUEST_STORES = 1;
     public static final int REQUEST_DATE_INVOICE= 2;
-    public static long inventoryIdForActivity;
+    public static long inventoryIdForActivity = 0;
     InventoryInvoice inventoryInvoice;
     private InventoryInvoice inventoryInvoiceCopy = null;
     public boolean markSave = false;
@@ -90,6 +91,8 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
             inventoryInvoiceCopy.setDate(inventoryInvoice.getDate());
             inventoryInvoiceCopy.setStoreId(inventoryInvoice.getStoreId());
         }
+        else
+            inventoryInvoice.setCurrentDate();
 
 
     }
@@ -188,7 +191,7 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
     public void showInventory(InventoryInvoice inventoryInvoice){
 
         textViewNumber.setText(inventoryInvoice.getNumber().toString());
-        buttonDate.setText(inventoryInvoice.getDate().toString());
+        buttonDate.setText(ReverseDate.getDate(inventoryInvoice.getDate().toString()));
         buttonStores.setText(inventoryInvoice.getNameStore().toString());
     }
 
@@ -202,33 +205,35 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(!(textViewNumber.getText().toString().equals("")) && !buttonStores.getText().equals("") && !buttonDate.getText().equals(""))
             saveInvoice();
-        else
-            Toast.makeText(getContext(),"Введіть всі дані перш ніж зберегти",Toast.LENGTH_SHORT).show();
+
 
         return super.onOptionsItemSelected(item);
     }
 
 
-    public void saveInvoice(){
-        if(inventoryId == 0) {
-            inventoryInvoice.setCreated(CreateType.device.ordinal());
-            SqlQuery.insertInventory(getContext(),inventoryInvoice);
+    public boolean saveInvoice(){
+        if(!(textViewNumber.getText().toString().equals("")) && !buttonStores.getText().equals("") && !buttonDate.getText().equals("")) {
+            if (inventoryId == 0) {
+                inventoryInvoice.setCreated(CreateType.device.ordinal());
+                SqlQuery.insertInventory(getContext(), inventoryInvoice);
 
-            showToast("створено");
-            inventoryIdForActivity  = inventoryInvoice.getInventoryId();
-            markSave = true;
-            inventoryId = inventoryInvoice.getInventoryId();
-            inventoryInvoiceCopy = inventoryInvoice;
-        }
-        else
-        {
+                showToast("створено");
+                inventoryIdForActivity = inventoryInvoice.getInventoryId();
+                markSave = true;
+                inventoryId = inventoryInvoice.getInventoryId();
+                inventoryInvoiceCopy = inventoryInvoice;
+            } else {
 
-            SqlQuery.updateInventory(getContext(),inventoryInvoice);
-            showToast("оновлено");
-            markSave = true;
+                SqlQuery.updateInventory(getContext(), inventoryInvoice);
+                showToast("оновлено");
+                markSave = true;
+            }
+        }else {
+            Toast.makeText(getContext(), "Введіть всі дані перш ніж зберегти", Toast.LENGTH_SHORT).show();
+            return false;
         }
+        return true;
     }
 
     public void showToast(String nameType){
@@ -256,10 +261,9 @@ public class InventoryEditFragment extends Fragment implements OnBackPressedList
         });
         ad.setPositiveButton(button2String, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                Toast.makeText(getContext(), "Дані збережено", Toast.LENGTH_LONG)
-                        .show();
 
-                saveInvoice();
+                if(saveInvoice()==true)
+                    Toast.makeText(getContext(), "Дані збережено", Toast.LENGTH_LONG).show();
                 getActivity().finish();
             }
         });

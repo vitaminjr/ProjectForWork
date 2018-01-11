@@ -1,6 +1,8 @@
 package com.example.vitaminjr.mobileacounting.activities;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
+import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.file.OpenFileDialog;
 import com.example.vitaminjr.mobileacounting.registration.Registration;
 
@@ -120,6 +123,17 @@ public class RegistrationActivity extends AppCompatActivity{
                         }
                     }
                 });
+            }
+        });
+
+        textKey.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clipData = ClipData.newPlainText("TAG",textKey.getText());
+                clipboardManager.setPrimaryClip(clipData);
+                Toast.makeText(getBaseContext(), "Скопійовано в буфер", Toast.LENGTH_SHORT).show();
+
             }
         });
     }

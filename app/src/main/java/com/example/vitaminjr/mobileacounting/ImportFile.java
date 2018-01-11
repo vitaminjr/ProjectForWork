@@ -5,16 +5,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
-
 import com.example.vitaminjr.mobileacounting.interfaces.ReturnEventListener;
-
-import java.io.File;
-import java.io.FileInputStream;
+import com.hierynomus.smbj.share.DiskShare;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import jcifs.smb.SmbFile;
+
 
 /**
  * Created by vitaminjr on 23.09.16.
@@ -27,6 +24,7 @@ public class ImportFile extends AsyncTask<Void,Integer,Boolean> {
     String address;
     String addressFile;
     ReturnEventListener listener;
+    DiskShare share;
 
     public ImportFile(Context context, String address, String addressFile) {
 
@@ -47,7 +45,6 @@ public class ImportFile extends AsyncTask<Void,Integer,Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-
         return importFile(address,addressFile);
     }
 
@@ -86,7 +83,7 @@ public class ImportFile extends AsyncTask<Void,Integer,Boolean> {
 
             SmbFile localAuditPCFile = new SmbFile(urlAddress);
 
-
+            localAuditPCFile.connect();
             InputStream in = localAuditPCFile.getInputStream();
 
             OutputStream out = new FileOutputStream(fileAddress);

@@ -1,7 +1,14 @@
 package com.example.vitaminjr.mobileacounting.models;
 
+import android.hardware.camera2.params.Face;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by vitaminjr on 13.07.16.
@@ -9,9 +16,11 @@ import android.os.Parcelable;
 public class Invoice implements Parcelable {
 
     private String numberInvoice;
+    private String numberInvoiceProvider;
     private String nameProvider;
     private String codeEDRPOU;
     private String dateCreateInvoice;
+    private String dateCreateInvoiceProvider;
     private int providerId;
     private String invoiceCode;
 
@@ -23,7 +32,9 @@ public class Invoice implements Parcelable {
         numberInvoice = "";
         nameProvider = "";
         codeEDRPOU = "";
+        numberInvoiceProvider = "";
         dateCreateInvoice = "";
+        dateCreateInvoiceProvider = "";
         invoiceCode = "";
         providerId = 0;
         invoiceTypeId = 0;
@@ -35,12 +46,55 @@ public class Invoice implements Parcelable {
         invoiceId = in.readInt();
         numberInvoice = in.readString();
         nameProvider = in.readString();
+        numberInvoiceProvider = in.readString();
+        dateCreateInvoiceProvider = in.readString();
         codeEDRPOU = in.readString();
         dateCreateInvoice = in.readString();
         providerId = in.readInt();
         invoiceTypeId = in.readInt();
         created = in.readInt();
     }
+
+
+    public String getDateCreateInvoiceProvider() {
+
+        if(dateCreateInvoiceProvider != null) {
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+            SimpleDateFormat dateFormatBack = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+
+            String sDate = dateCreateInvoiceProvider;
+
+            Date date;
+            try {
+                if(isBackPattern(dateCreateInvoiceProvider) == true){
+                    date = dateFormatBack.parse(dateCreateInvoiceProvider);
+                }else
+                    date = dateFormat.parse(dateCreateInvoiceProvider);
+
+                sDate = dateFormat.format(date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            dateCreateInvoiceProvider = sDate;
+        }
+
+        return dateCreateInvoiceProvider;
+    }
+
+    public void setDateCreateInvoiceProvider(String dateCreateInvoiceProvider) {
+        this.dateCreateInvoiceProvider = dateCreateInvoiceProvider;
+    }
+
+    public String getNumberInvoiceProvider() {
+        return numberInvoiceProvider;
+    }
+
+    public void setNumberInvoiceProvider(String numberInvoiceProvider) {
+        this.numberInvoiceProvider = numberInvoiceProvider;
+    }
+
 
     public static final Creator<Invoice> CREATOR = new Creator<Invoice>() {
         @Override
@@ -121,6 +175,24 @@ public class Invoice implements Parcelable {
     }
 
     public String getDateCreateInvoice() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+        SimpleDateFormat dateFormatBack = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+
+        String sDate = dateCreateInvoice;
+
+       Date date;
+        try {
+            if(isBackPattern(dateCreateInvoice) == true){
+                date = dateFormatBack.parse(dateCreateInvoice);
+            }else
+                date = dateFormat.parse(dateCreateInvoice);
+
+            sDate = dateFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        dateCreateInvoice = sDate;
         return dateCreateInvoice;
     }
 
@@ -144,5 +216,39 @@ public class Invoice implements Parcelable {
         dest.writeInt(invoiceTypeId);
         dest.writeInt(created);
     }
+
+    public void setCurrentDate(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+
+
+        String sDate = dateFormat.format(date);
+        setDateCreateInvoice(sDate);
+    }
+
+    public boolean isBackPattern(String date){
+        int count = 0;
+        try {
+            char[] ch = date.toCharArray();
+
+            if(ch[4] == '-'){
+                count ++;
+            }
+            if(ch[7] == '-'){
+                count ++;
+            }
+
+            if(count == 2)
+                return true;
+        }catch (Exception ex){
+            return false;
+        }
+        return false;
+    }
+
+
+
+
+
 
 }

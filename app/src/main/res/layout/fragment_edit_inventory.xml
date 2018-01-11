@@ -29,6 +29,7 @@
             android:layout_margin="10dp"
             android:hint="                       "
             android:gravity="center"
+            android:inputType="number"
             style="@style/editStyle2"/>
 
     </LinearLayout>

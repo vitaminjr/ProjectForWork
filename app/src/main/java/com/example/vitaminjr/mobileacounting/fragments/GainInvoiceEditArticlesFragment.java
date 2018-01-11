@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditArticlesA
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
 import com.example.vitaminjr.mobileacounting.helpers.CreateType;
+import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.helpers.SetHideNotKeyboard;
 import com.example.vitaminjr.mobileacounting.interfaces.GetFragementListener;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
@@ -46,6 +48,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     private String invoiceNumber;
     private int correctionType;
     private int idInvoice;
+    private int invoiceTypeId;
     private int positionArticle;
     private int created;
     private int corrTypeStart;
@@ -71,6 +74,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     TextView textViewPlannedCount;
     boolean cancelButton = false;
     public boolean isOnCreateDialog = false;
+    private float quantityAccountTemp = 0;
+    SharedPreferences preferences;
+    View view;
 
     public static GainInvoiceEditArticlesFragment newInstance(String invoiceNumber, int typeFragment, int idInvoice, int created){
 
@@ -79,9 +85,17 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         return gainInvoiceEditArticlesFragment;
     }
 
-    public static GainInvoiceEditArticlesFragment newInstance(String invoiceNumber, int typeFragment, int idInvoice, int position, int created){
+    public static GainInvoiceEditArticlesFragment newInstance(String invoiceNumber, int typeFragment, int idInvoice, int positionArticle,int created, int invoiceTypeId){
 
-        GainInvoiceEditArticlesFragment gainInvoiceEditArticlesFragment = new GainInvoiceEditArticlesFragment(invoiceNumber, typeFragment, idInvoice, position,created);
+        GainInvoiceEditArticlesFragment gainInvoiceEditArticlesFragment = new GainInvoiceEditArticlesFragment(invoiceNumber, typeFragment, idInvoice, positionArticle ,created, invoiceTypeId);
+
+        return gainInvoiceEditArticlesFragment;
+    }
+
+
+    public static GainInvoiceEditArticlesFragment newInstance(String invoiceNumber, int typeFragment, int idInvoice, int created, int invoiceTypeId){
+
+        GainInvoiceEditArticlesFragment gainInvoiceEditArticlesFragment = new GainInvoiceEditArticlesFragment(invoiceNumber, typeFragment, idInvoice ,created, invoiceTypeId);
 
         return gainInvoiceEditArticlesFragment;
     }
@@ -107,18 +121,32 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         this.correctionType = typeFragment;
         this.idInvoice = idInvoice;
         this.created = created;
+        this.created = created;
 
     }
 
-    public GainInvoiceEditArticlesFragment(String number, int typeFragment, int idInvoice, int position, int created)
+
+    public GainInvoiceEditArticlesFragment(String number, int typeFragment, int idInvoice,int positionArticle,int created,int invoiceTypeId)
     {
         invoiceRow = new InvoiceRow();
         article = new InvoiceRow();
         this.invoiceNumber = number;
         this.correctionType = typeFragment;
         this.idInvoice = idInvoice;
-        this.positionArticle = position;
         this.created = created;
+        this.invoiceTypeId = invoiceTypeId;
+        this.positionArticle = positionArticle;
+    }
+
+    public GainInvoiceEditArticlesFragment(String number, int typeFragment, int idInvoice,int created,int invoiceTypeId)
+    {
+        invoiceRow = new InvoiceRow();
+        article = new InvoiceRow();
+        this.invoiceNumber = number;
+        this.correctionType = typeFragment;
+        this.idInvoice = idInvoice;
+        this.created = created;
+        this.invoiceTypeId = invoiceTypeId;
     }
 
     @Override
@@ -132,29 +160,25 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view =  inflater.inflate(R.layout.fragment_edit_articles_invoice,container,false);
+        view =  inflater.inflate(R.layout.fragment_edit_articles_invoice,container,false);
         isOnCreateDialog = false;
         initGui(view);
 
         listTemplate = SqlQuery.getBarcodeTemplates(getContext());
         corrTypeStart = correctionType;
-        if((correctionType == CorrectionType.ctUpdate.ordinal()
-                && created == CreateType.device.ordinal()) ||
-                correctionType == CorrectionType.ctCollate.ordinal()) {
-            ShowListInvoice();
-            stateElements(false,true,false,true,true);
-            editTextCountArticle.selectAll();
-        }else
-            stateElements(true,false,false,false,false);
+        startCursor();
 
         Listeners();
         Log.d("Log", "onCreateView");
+        preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         Log.d("Log", "onResume");
     }
 
@@ -170,7 +194,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         if (item.getItemId() == android.R.id.home) {
             cancelButton = true;
             if(invoiceRow.getArticleId() == 0){
-                if(!editTextBarcodeInvoice.getText().toString().equals("")){
+                if(!invoiceRow.getBarcode().toString().equals("")){
                     saveInvoiceRow();
                     getActivity().finish();
                 }
@@ -194,7 +218,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
     public void onBackPressed() {
         cancelButton = true;
         if(invoiceRow.getArticleId() == 0){
-            if(!editTextBarcodeInvoice.getText().toString().equals("")){
+            if (invoiceRow.getBarcode() == null)
+                invoiceRow.setBarcode("");
+            if(!invoiceRow.getBarcode().toString().equals("") ){
                 saveInvoiceRow();
                 getActivity().finish();
             } else
@@ -229,15 +255,12 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        if(preferences.getBoolean("show_keyboard",false) == false){
+        if(preferences.getBoolean("show_keyboard",false) == false ){
         SetHideNotKeyboard hideBarcode = new SetHideNotKeyboard(getActivity(),editTextBarcodeInvoice);
         SetHideNotKeyboard hideCount = new SetHideNotKeyboard(getActivity(),editTextCountArticle);
         editTextBarcodeInvoice.setOnTouchListener(hideBarcode);
         editTextCountArticle.setOnTouchListener(hideCount);
         }
-
-
-
 
         textNumberInvoice.setText(String.valueOf(invoiceNumber));
 
@@ -269,7 +292,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
 
                         if(resultTmp.getQuantity()!= -1) {
-                            editTextCountArticle.setText(String.valueOf(resultTmp.getQuantity()));
+                            editTextCountArticle.setText(String.format("%.2f",resultTmp.getQuantity()).replace(",","."));
                             article.setQuantityAccount(Float.parseFloat(String.valueOf(resultTmp.getQuantity())));
                         }
                         if (resultTmp.getPrice() != -1) {
@@ -289,7 +312,8 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                         {
                             invoiceRow = SqlQuery.getInvoiceRowByArticleId((int) article.getArticleId(), idInvoice, getContext());
                             if(resultTmp.getQuantity()!= -1) {
-                                editTextCountArticle.setText(String.valueOf(resultTmp.getQuantity()));
+
+                                editTextCountArticle.setText(String.format("%.2f",resultTmp.getQuantity()).replace(",","."));
                                 invoiceRow.setQuantityAccount(Float.parseFloat(String.valueOf(resultTmp.getQuantity())));
                                 article.setQuantityAccount(Float.parseFloat(String.valueOf(resultTmp.getQuantity())));
 
@@ -309,6 +333,8 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                                         editTextCountArticle.requestFocus();
                                     } else {
                                         invoiceRow = article;
+                                        if(invoiceTypeId == InvoiceType.expense.ordinal())
+                                            invoiceRow.setPrice(article.getPriceOut());
                                         stateElements(false,true,false,true,true);
                                         editTextCountArticle.requestFocus();
                                     }
@@ -317,10 +343,10 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
                                 case pcType:
                                     if (invoiceRow.getInvoiceRowId() != 0) {
-
-                                        invoiceRow.setBarcode(article.getBarcode());
+                                            invoiceRow.setBarcode(article.getBarcode());
+                                        invoiceRow.setPriceAccount(article.getPrice());
                                         showArticles(invoiceRow, correctionType);
-                                        textViewPlannedCount.setText(String.valueOf(invoiceRow.getQuantity()));
+                                        textViewPlannedCount.setText(String.format("%.3f",invoiceRow.getQuantity()).replace(",","."));
                                         stateElements(false,true,false,true,true);
                                         editTextCountArticle.requestFocus();
                                         editTextCountArticle.selectAll();
@@ -349,19 +375,28 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     try {
-                        invoiceRow.setQuantityAccount(Float.parseFloat(String.valueOf(editTextCountArticle.getText())));
+                        invoiceRow.setQuantityAccount(Float.parseFloat(
+                                String.valueOf(editTextCountArticle.getText())));
 
                         float suma = invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount();
                         invoiceRow.setSumaAccount(suma);
                         textViewSumaArticle.setText(String.format("%.2f",suma).replace(",","."));
 
                         if(created == CreateType.pc.ordinal()) {
+                            if(preferences != null && preferences.getBoolean("acumulation",false) == true &&
+                                    preferences.getBoolean("fact_count",false) == false){
+                                   invoiceRow.setQuantityAccount(quantityAccountTemp + invoiceRow.getQuantityAccount());
+                            }
                             updateInvoiceRowWithCondition();
                         }
 
                         if(created == CreateType.device.ordinal()){
-                            stateElements(false,false,true,false,false);
+                            if(preferences.getBoolean("enable_editText",false)==false)
+                                stateElements(false,false,true,false,false);
+                            else
+                                stateElements(false,true,true,true,true);
                             editTextPriceArticle.requestFocus();
+                            editTextPriceArticle.selectAll();
                         }
                     }
                     catch (NumberFormatException ex){
@@ -419,7 +454,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
                         article.clear();
                         stateElements(true,false,false,false,false);
                         editTextBarcodeInvoice.requestFocus();
-                    }else if(corrTypeStart == CorrectionType.ctUpdate.ordinal()) {
+                    }else if(corrTypeStart == CorrectionType.ctCollate.ordinal()) {
                         stateElements(false,true,false,true,true);
                         editTextCountArticle.requestFocus();
                     }else {
@@ -453,19 +488,30 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         if (corType == CorrectionType.ctInsert.ordinal() || corType == CorrectionType.ctNone.ordinal()) {
             invoiceRow.setQuantity((float) 1.000);
             invoiceRow.setQuantityAccount((float) 1.000);
-            editTextCountArticle.setText(String.valueOf(invoiceRow.getQuantity()));
+            editTextCountArticle.setText(String.valueOf(String.format("%.3f",invoiceRow.getQuantity()).replace(",",".")));
             float suma = invoiceRow.getPrice() * invoiceRow.getQuantity();
             invoiceRow.setPriceAccount(invoiceRow.getPrice());
             invoiceRow.setSumaAccount(suma);
+        }else if(created == CreateType.pc.ordinal()) {
+
+            if(preferences != null && preferences.getBoolean("acumulation",false) == true &&
+                    preferences.getBoolean("fact_count",false) == false){
+                invoiceRow = acumulation(invoiceRow);
+            }
+            textViewPlannedCount.setText(String.format("%.3f", invoiceRow.getQuantity()).replace(",", "."));
+            if(invoiceRow.getPriceAccount()==0)
+                invoiceRow.setPriceAccount(invoiceRow.getPrice());
+            if(preferences != null && preferences.getBoolean("fact_count",false) == true){
+                invoiceRow.setQuantityAccount(invoiceRow.getQuantity());
+            }
+        }else {
+            invoiceRow = acumulation(invoiceRow);
         }
 
-        if(created == CreateType.pc.ordinal()) {
-            textViewPlannedCount.setText(String.format("%.3f", invoiceRow.getQuantity()).replace(",", "."));
-            invoiceRow.setPriceAccount(invoiceRow.getPrice());
-        }
-        editTextPriceArticle.setText(String.format("%.2f",invoiceRow.getPriceAccount()).replace(",","."));
-        editTextCountArticle.setText(String.format("%.3f", invoiceRow.getQuantityAccount()).replace(",","."));
-        textViewSumaArticle.setText(String.format("%.2f",invoiceRow.getSumaAccount()).replace(",","."));
+
+        editTextPriceArticle.setText(String.format("%.2f", invoiceRow.getPriceAccount()).replace(",", "."));
+        editTextCountArticle.setText(String.format("%.3f", invoiceRow.getQuantityAccount()).replace(",", "."));
+        textViewSumaArticle.setText(String.format("%.2f", invoiceRow.getSumaAccount()).replace(",", "."));
 
         editTextBarcodeInvoice.setText(invoiceRow.getBarcode());
         textNameArticle.setText(invoiceRow.getName());
@@ -475,9 +521,16 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
     public void saveInvoiceRow(){
         invoiceRow.setCorrectionTypeId(correctionType);
-        invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+        if(preferences != null && preferences.getBoolean("acumulation",false) == true){
+
+            invoiceRow.setQuantityAccount(quantityAccountTemp + Float.parseFloat(editTextCountArticle.getText().toString()));
+        }else {
+            invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+
+        }
         invoiceRow.setPriceAccount(Float.parseFloat(String.valueOf(editTextPriceArticle.getText())));
         invoiceRow.setSumaAccount(invoiceRow.getPriceAccount()*invoiceRow.getQuantityAccount());
+
 
         if (correctionType == CorrectionType.ctInsert.ordinal())
         {
@@ -490,7 +543,7 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         }
         else
         {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String strDate = simpleDateFormat.format(new Date());
             invoiceRow.setDateTimeChange(strDate);
             SqlQuery.updateInvoiceRow(invoiceRow, getContext());
@@ -502,7 +555,9 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
         if(isArticlePager() == true){
             try {
-                invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+                if(preferences != null && preferences.getBoolean("acumulation",false) == false) {
+                    invoiceRow.setQuantityAccount(Float.parseFloat(editTextCountArticle.getText().toString()));
+                }
                 invoiceRow.setSumaAccount(invoiceRow.getQuantityAccount()*invoiceRow.getPriceAccount());
             }catch (Exception ex){
                 Toast.makeText(getContext(),"невірна кількість",Toast.LENGTH_SHORT).show();
@@ -510,9 +565,13 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
 
             if(invoiceRow.getQuantityAccount() != invoiceRowCopy.getQuantityAccount()
                     || invoiceRow.getPriceAccount() != Float.parseFloat(editTextPriceArticle.getText().toString()) ) {
-                if(invoiceRow.getQuantityAccount() > invoiceRow.getQuantity() ) {
-                    isOnCreateDialog = true;
-                    onCreateDialog();
+                if(invoiceRow.getQuantityAccount() > invoiceRow.getQuantity() && created == CreateType.pc.ordinal()) {
+                    if(preferences.getBoolean("ban_more_count",false)==false || created == CreateType.device.ordinal()) {
+                        isOnCreateDialog = true;
+                        onCreateDialog();
+                    }else
+                        Toast.makeText(getContext(),"Задана кількість перевищує фактичну",
+                                Toast.LENGTH_SHORT).show();
                 }
                 else {
                     saveInvoiceRow();
@@ -524,8 +583,14 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         }else {
 
             if (invoiceRow.getQuantityAccount() > invoiceRow.getQuantity()) {
-                isOnCreateDialog = true;
-                onCreateDialog();
+
+                if(preferences.getBoolean("ban_more_count",false)==false || created == CreateType.device.ordinal()) {
+                    isOnCreateDialog = true;
+
+                    onCreateDialog();
+                }else
+                    Toast.makeText(getContext(),"Задана кількість перевищує фактичну",
+                            Toast.LENGTH_SHORT).show();
             } else {
                 saveInvoiceRow();
                 clearForm();
@@ -687,6 +752,41 @@ public class GainInvoiceEditArticlesFragment extends Fragment  implements OnBack
         }catch (Exception ex){
             return false;
         }
+    }
+    public void startCursor(){
+        if((correctionType == CorrectionType.ctUpdate.ordinal()
+                && created == CreateType.device.ordinal()) ||
+                correctionType == CorrectionType.ctCollate.ordinal()) {
+            ShowListInvoice();
+            stateElements(false,true,false,true,true);
+            editTextCountArticle.setActivated(true);
+            Log.d("isActivated", String.valueOf(editTextCountArticle.isActivated()));
+            Log.d("findFocus", String.valueOf(editTextCountArticle.findFocus()));
+            Log.d("hasFocus", String.valueOf(editTextCountArticle.hasFocus()));
+            Log.d("isFocusable", String.valueOf(editTextCountArticle.isFocusable()));
+            Log.d("hasFocusable", String.valueOf(editTextCountArticle.hasFocusable()));
+            editTextCountArticle.requestFocus();
+            editTextCountArticle.selectAll();
+        }else
+            stateElements(true,false,false,false,false);
+    }
+
+    public void focusView(){
+        view.setActivated(true);
+        view.findFocus();
+    }
+
+    public InvoiceRow acumulation(InvoiceRow invoiceRow){
+        if(preferences != null && preferences.getBoolean("acumulation",false) == true){
+            quantityAccountTemp = invoiceRow.getQuantityAccount();
+
+            invoiceRow.setQuantityAccount((float) 1.000);
+            float suma = invoiceRow.getPrice() * invoiceRow.getQuantityAccount();
+            invoiceRow.setPriceAccount(invoiceRow.getPrice());
+            invoiceRow.setSumaAccount(suma);
+
+        }
+        return invoiceRow;
     }
 
 }

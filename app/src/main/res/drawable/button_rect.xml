@@ -13,9 +13,7 @@
                 android:bottom="10dp"/>
         </shape>
 
-
     </item>
-
 
     <item android:state_selected="true">
 
@@ -35,7 +33,6 @@
 
     <item android:state_focused="true">
 
-
         <shape android:shape="rectangle">
             <corners android:radius="3dip" />
 
@@ -50,16 +47,11 @@
 
     </item>
 
-
-
-
-
     <item>
 
         <shape android:shape="rectangle">
 
             <corners android:radius="3dip" />
-
 
             <stroke android:width="1dip" android:color="#000000" />
 
@@ -72,8 +64,6 @@
 
         </shape>
 
-
     </item>
-
 
 </selector>

@@ -145,7 +145,7 @@ public class CheckPricesEditFragment extends Fragment {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
 
-                    if(article.getPrice() == Float.parseFloat(editTextPriceTag.getText().toString())){
+                    if(article.getPriceOut() == Float.parseFloat(editTextPriceTag.getText().toString())){
                         clearTextView();
                         editTextBarcodeArticleAction(true,true,true);
                         editTextPriceTagArticleAction(false,false,false);
@@ -188,8 +188,8 @@ public class CheckPricesEditFragment extends Fragment {
     public void showArticle(){
         textViewUnitName.setText(article.getUnitName().toString());
         textViewNameArticle.setText(article.getName().toString());
-        textViewPrice.setText(String.valueOf(article.getPrice()));
-        editTextPriceTag.setText(String.valueOf(article.getPrice()));
+        textViewPrice.setText(String.valueOf(article.getPriceOut()));
+        editTextPriceTag.setText(String.valueOf(article.getPriceOut()));
     }
 
     public void editTextBarcodeArticleAction(boolean enabled, boolean focusable, boolean focusableInTouch){

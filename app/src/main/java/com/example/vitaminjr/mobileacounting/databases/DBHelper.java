@@ -1,5 +1,6 @@
 package com.example.vitaminjr.mobileacounting.databases;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -9,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DBHelper extends SQLiteOpenHelper {
 
+    Context context;
 
     public DBHelper(Context context) {
         super(context, "/sdcard/mobileAcounting/mobile_accounting.odf", null, 3);
@@ -16,10 +18,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context, String name) {
         super(context, name, null, 3);
+        this.context = context;
+
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
+        SqlQuery.createSql(db, context);
+
         db.execSQL("CREATE TABLE IF NOT EXISTS article_barcodes ("
                 + "article_barcode_id integer PRIMARY KEY AUTOINCREMENT,"
                 + "article_id        integer,"
@@ -32,6 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + "name              varchar(100),"
                 + "unit_name         varchar(20),"
                 + "price             float(15,3),"
+                + "price_out             float(15,3),"
                 + "quantity_remains  float(15,3)" + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS barcode_templates ("
@@ -80,9 +88,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS invoices (" +
                 "invoice_id       integer PRIMARY KEY AUTOINCREMENT," +
                 "invoice_code     varchar(50)," +
-                "NUMBER           varchar(50)," +
+                "number           varchar(50)," +
                 "provider_id      integer," +
                 "date_d           date," +
+                "number_doc           varchar(50)," +
+                "date_doc           date," +
                 "invoice_type_id  integer," +
                 "created          integer DEFAULT 0" + ");");
 
@@ -103,8 +113,44 @@ public class DBHelper extends SQLiteOpenHelper {
                 "store_code  varchar(50)," +
                 "name       varchar(50) " + ");");
 
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  articles_index0 ON articles(article_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  articles_Index01 ON articles(article_code);");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS providers_Index01 ON providers(provider_code);");
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS providers_index0 ON providers(provider_id);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS invoice_rows_Index01 ON invoice_rows(invoice_row_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS invoice_rows_Index02 ON invoice_rows(invoice_id);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS  invoices_Index01 ON invoices(invoice_id);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS  invoices_Index02 ON invoices(invoice_code);");
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS inventories_Index0 ON inventories(inventory_id);");
+        db.execSQL(" CREATE INDEX IF NOT EXISTS inventories_Index01 ON inventories(inventory_code);");
+
+        db.execSQL("CREATE INDEX inventory_action_Index01 ON inventory_action(inventory_id);");
+        db.execSQL("CREATE INDEX inventory_action_Index02 ON inventory_action(article_id);");
+
+
+        db.execSQL("CREATE INDEX inventory_rows_Index01 ON inventory_rows(inventory_id);");
+        db.execSQL("CREATE INDEX inventory_rows_Index02 ON inventory_rows(article_id);");
+
+
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS stores_Index0 ON stores(store_id);");
+        db.execSQL(" CREATE INDEX IF NOT EXISTS stores_Index01 ON stores(store_code);");
+
+        ContentValues values = new ContentValues();
+        values.put("name", "Постачальник");
+        db.insert("providers", null, values);
+
+
+
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
+
+
+
 }

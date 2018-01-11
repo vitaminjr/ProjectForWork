@@ -128,14 +128,18 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
             view.findViewById(R.id.linear_layout_fact).setVisibility(LinearLayout.GONE);
             editTextBarcodeInventoryAction(false,false,false);
             editTextCountArticleAction(true,true,true);
+            buttonCountMinus.setEnabled(true);
+            buttonCountPlus.setEnabled(true);
             editTextCountArticle.requestFocus();
             editTextCountArticle.selectAll();
             countTemp = inventoryAction.getQuantity();
 
-        }
-
-        else
+        }else {
             listTemplate = SqlQuery.getBarcodeTemplates(getContext());
+            editTextCountArticleAction(false,false,false);
+            buttonCountMinus.setEnabled(false);
+            buttonCountPlus.setEnabled(false);
+        }
 
 
 
@@ -217,11 +221,15 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
                             editTextCountArticleAction(false,false,false);
                             editTextBarcodeInventory.setText("");
                             editTextBarcodeInventory.requestFocus();
+                            buttonCountMinus.setEnabled(false);
+                            buttonCountPlus.setEnabled(false);
                         }
                         else {
                             editTextBarcodeInventoryAction(false, false, false);
                             editTextCountArticleAction(true, true, true);
                             editTextCountArticle.requestFocus();
+                            buttonCountMinus.setEnabled(true);
+                            buttonCountPlus.setEnabled(true);
 
                             showArticles(inventoryAction,CorrectionType.ctInsert.ordinal());
                             editTextCountArticle.selectAll();
@@ -443,6 +451,8 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
             clearTextView();
             editTextBarcodeInventoryAction(true, true, true);
             editTextCountArticleAction(false, false, false);
+            buttonCountMinus.setEnabled(false);
+            buttonCountPlus.setEnabled(false);
             editTextBarcodeInventory.requestFocus();
             inventoryAction.clear();
         }
@@ -453,7 +463,5 @@ public class InventoryEditArticlesFragment extends Fragment  implements OnBackPr
 
 
     }
-
-
 
 }

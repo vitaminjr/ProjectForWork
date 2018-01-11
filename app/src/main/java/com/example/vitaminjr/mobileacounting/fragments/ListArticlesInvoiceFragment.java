@@ -41,17 +41,19 @@ public class ListArticlesInvoiceFragment extends Fragment {
     ListViewArticlesAdapter adapter;
     long idTemp;
     ListView listView;
+    int invoiceTypeId;
 
-    public static ListArticlesInvoiceFragment newInstance(String number, int invoiceId, int correctionType, int created){
-        ListArticlesInvoiceFragment listArticlesInvoiceFragment = new ListArticlesInvoiceFragment(number, invoiceId, correctionType, created);
+    public static ListArticlesInvoiceFragment newInstance(String number, int invoiceId, int correctionType, int created, int invoiceTypeId){
+        ListArticlesInvoiceFragment listArticlesInvoiceFragment = new ListArticlesInvoiceFragment(number, invoiceId, correctionType, created, invoiceTypeId);
         return listArticlesInvoiceFragment;
     }
 
-    public ListArticlesInvoiceFragment(String number, int invoiceId, int correctionType, int created){
+    public ListArticlesInvoiceFragment(String number, int invoiceId, int correctionType, int created, int invoiceTypeId){
         this.invoiceId = invoiceId;
         this.correctionType = correctionType;
         this.numberInvoice = number;
         this.created = created;
+        this.invoiceTypeId = invoiceTypeId;
 
 
     }
@@ -95,7 +97,8 @@ public class ListArticlesInvoiceFragment extends Fragment {
                 intent.putExtra("invoiceId",invoiceId);
                 intent.putExtra("created",created);
                 intent.putExtra("position",position);
-                intent.putExtra("corrType",correctionType);
+                intent.putExtra("type",invoiceTypeId);
+                intent.putExtra("corrType",CorrectionType.ctCollate.ordinal());
                 startActivity(intent);
 
 

@@ -14,6 +14,7 @@ import android.view.View;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceEditArticlesFragment;
 import com.example.vitaminjr.mobileacounting.fragments.InventoryEditArticlesFragment;
+import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 
 
@@ -27,6 +28,7 @@ public class InvoiceEditArticlesItem extends AppCompatActivity {
     int created;
     int position;
     int correctionType;
+    int invoiceTypeId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,10 +41,11 @@ public class InvoiceEditArticlesItem extends AppCompatActivity {
         created =  intent.getIntExtra("created",0);
         position  =  intent.getIntExtra("position",0);
         correctionType =  intent.getIntExtra("corrType",0);
+        invoiceTypeId = intent.getIntExtra("type",-1);
 
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        GainInvoiceEditArticlesFragment editFragment = GainInvoiceEditArticlesFragment.newInstance(numberInvoice, correctionType,invoiceId, position,created);
+        GainInvoiceEditArticlesFragment editFragment = GainInvoiceEditArticlesFragment.newInstance(numberInvoice, correctionType,invoiceId, position,created, invoiceTypeId);
         fragmentTransaction.replace(R.id.fragment_container, editFragment);
         fragmentTransaction.commit();
     }

@@ -32,6 +32,7 @@
         android:layout_alignParentEnd="true">
     </LinearLayout>
 
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -46,22 +47,32 @@
             android:id="@+id/button_prev_fragment"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:paddingLeft="12dp"
-            android:layout_marginRight="25dp"
+            android:paddingLeft="5dp"
+            android:layout_marginRight="10dp"
             android:layout_marginBottom="7dp"
             android:background="@drawable/button_rect_layer_left"
+            />
+
+        <ImageView
+            android:layout_width="90dp"
+            android:layout_height="40dp"
+            android:src="@drawable/style_button_edit"
+            android:layout_marginBottom="6dp"
+            android:id="@+id/button_edit"
+            android:scaleType="fitCenter"
+            android:clickable="true"
 
             />
+
         <Button
             android:id="@+id/button_next_fragment"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginBottom="7dp"
             android:background="@drawable/button_rect_layer_right"
             />
     </LinearLayout>
-
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"

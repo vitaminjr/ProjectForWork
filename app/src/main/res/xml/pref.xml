@@ -49,6 +49,40 @@
 
     </CheckBoxPreference>
 
+    <CheckBoxPreference android:key="ban_more_count"
+        android:summary="Заборона більшої кількості"
+        android:title="Заборона кількості яка перевищує фактичну" >
+
+    </CheckBoxPreference>
+
+    <CheckBoxPreference android:key="fact_count"
+        android:summary="Заповнити фактичну кількість як планову "
+        android:title="Фактична кількість" >
+
+    </CheckBoxPreference>
+
+
+    <CheckBoxPreference android:key="enable_editText"
+        android:summary="Дозволити редагувати поля кількості та ціни"
+        android:title="Дозволити редагування" >
+
+    </CheckBoxPreference>
+
+    <CheckBoxPreference android:key="one_symbool_prefiks"
+        android:summary="Перевіряти шаблон префікса тільки першої цифри"
+        android:title="Перевірка префіксу 1 цифрою " >
+
+    </CheckBoxPreference>
+
+    <CheckBoxPreference android:key="acumulation"
+        android:summary="Накопичування в приході, переміщенні та видатках"
+        android:title="Накопичення в накладних" >
+
+    </CheckBoxPreference>
+
+
+
+
     <Preference android:title="Налашутвання по замовчуванню"
         android:key="default_settings">
     </Preference>

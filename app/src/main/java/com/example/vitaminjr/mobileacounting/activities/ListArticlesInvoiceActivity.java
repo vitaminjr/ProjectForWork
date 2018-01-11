@@ -34,6 +34,7 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
     MenuItem searchItem;
     int corrType;
     int created;
+    int invoiceTypeId;
     String numberInvoice;
 
     @Override
@@ -48,10 +49,11 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
         idInvoice =  getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.IDINVOICE,0);
         created = getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.CREATED,-1);
         numberInvoice = getArticleInvoiceIntent.getStringExtra(GainInvoiceEditActivity.NUMBER);
+        invoiceTypeId = getArticleInvoiceIntent.getIntExtra(GainInvoiceEditActivity.INVOICE_TYPE,0);
 
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment.newInstance(numberInvoice,idInvoice,corrType,created);
+        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment.newInstance(numberInvoice,idInvoice,corrType,created, invoiceTypeId);
         fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInvoiceFragment);
         fragmentTransaction.commit();
 
@@ -170,7 +172,8 @@ public class ListArticlesInvoiceActivity extends AppCompatActivity implements On
     protected void onResume() {
         super.onResume();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment.newInstance(numberInvoice,idInvoice,corrType,created);
+        ListArticlesInvoiceFragment listArticlesInvoiceFragment = ListArticlesInvoiceFragment
+                .newInstance(numberInvoice,idInvoice,corrType,created, invoiceTypeId);
         fragmentTransaction.replace(R.id.article_invoice_container, listArticlesInvoiceFragment);
         fragmentTransaction.commit();
 

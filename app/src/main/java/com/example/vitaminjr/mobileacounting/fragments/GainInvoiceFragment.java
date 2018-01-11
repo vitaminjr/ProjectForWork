@@ -6,14 +6,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -21,10 +17,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.vitaminjr.mobileacounting.Preferences;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditActivity;
 import com.example.vitaminjr.mobileacounting.adapters.ListViewAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
+import com.example.vitaminjr.mobileacounting.helpers.InvoiceType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnSomeEventListener;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
 import com.melnykov.fab.FloatingActionButton;
@@ -36,9 +34,8 @@ public class GainInvoiceFragment extends Fragment {
     public ListViewAdapter adapter;
     ListView listView;
     int invoiceTypeId;
-     OnSomeEventListener onSomaEventListener;
-    public Cursor cursor;
-    AppCompatActivity activity;
+    public Cursor cursor = null;
+
     long idTemp;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,16 +58,7 @@ public class GainInvoiceFragment extends Fragment {
         this.invoiceTypeId = invoiceTypeId;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            this.activity = (AppCompatActivity) activity;
-            onSomaEventListener = (OnSomeEventListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement onSomeEventListener");
-        }
-    }
+
 
     @Nullable
     @Override
@@ -94,12 +82,9 @@ public class GainInvoiceFragment extends Fragment {
             }
         });
         listView = (ListView) getActivity().findViewById(R.id.listView);
-        cursor = SqlQuery.getCursorListInvoices(getContext(), invoiceTypeId);
-        adapter = new ListViewAdapter(getContext(), cursor, false);
-        onSomaEventListener.someEvent(adapter);
+        adapter = new ListViewAdapter(getContext(), setDataFromDBAdapter(), false);
         listView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
+        //adapter.notifyDataSetChanged();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -107,7 +92,11 @@ public class GainInvoiceFragment extends Fragment {
                 intent.putExtra("id", id);
                 intent.putExtra("position", position);
                 intent.putExtra("type", invoiceTypeId);
-                Invoice invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(), id));
+                Invoice invoice = null;
+                if(invoiceTypeId == InvoiceType.move.ordinal())
+                    invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceMoveById(getContext(), id));
+                else
+                    invoice = SqlQuery.getInvoice(SqlQuery.getInvoiceById(getContext(), id));
                 intent.putExtra("created", invoice.getCreated());
                 startActivity(intent);
             }
@@ -138,7 +127,6 @@ public class GainInvoiceFragment extends Fragment {
                 if(item.getItemId() == R.id.delete_item){
                     SqlQuery.deleteInvoice(getContext(),idTemp);
                     Toast.makeText(getContext(),"Успішно видалено!!!",Toast.LENGTH_SHORT).show();
-                    adapter.notifyDataSetChanged();
                     onResume();
                 }
                 return true;
@@ -154,10 +142,51 @@ public class GainInvoiceFragment extends Fragment {
 
     @Override
     public void onResume() {
-        super.onResume();
-        adapter = new ListViewAdapter(getContext(),SqlQuery.getCursorListInvoices(getContext(), invoiceTypeId),true);
-        listView.setAdapter(adapter);
+       super.onResume();
+        updateAdapterWithCursor(cursor);
+
     }
 
+    public Cursor setDataFromDBAdapter(){
+        Cursor cursor;
 
+        if(Preferences.loadBooleanSetting("isHideInvoice",getContext()) == false) {
+
+            if(invoiceTypeId == InvoiceType.move.ordinal())
+                cursor = SqlQuery.getCursorListInvoicesMove(getContext(), invoiceTypeId);
+            else
+                cursor = SqlQuery.getCursorListInvoices(getContext(), invoiceTypeId);
+
+        }else {
+
+            if (invoiceTypeId == InvoiceType.move.ordinal())
+                cursor = SqlQuery.getCursorListInvoicesMoveWithoutComplete(getContext(), invoiceTypeId);
+            else
+                cursor = SqlQuery.getCursorListInvoicesWithoutComplete(getContext(), invoiceTypeId);
+        }
+        
+        return cursor;
+    }
+
+    public void updateAdapter(){
+
+        adapter.swapCursor(setDataFromDBAdapter());
+        adapter.notifyDataSetChanged();
+    }
+
+    public void updateAdapterWithCursor(Cursor cursor){
+
+        if(cursor == null)
+            updateAdapter();
+        else {
+            adapter.swapCursor(cursor);
+            adapter.notifyDataSetChanged();
+            this.cursor = null;
+        }
+
+    }
+
+    public void setCursor(Cursor cursor) {
+        this.cursor = cursor;
+    }
 }

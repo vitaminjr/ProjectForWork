@@ -2,16 +2,22 @@ package com.example.vitaminjr.mobileacounting.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.example.vitaminjr.mobileacounting.Preferences;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.activities.GainInvoiceEditActivity;
 import com.example.vitaminjr.mobileacounting.activities.InventoryEditActivity;
@@ -33,6 +39,7 @@ public class InventoryFragment extends Fragment {
     public ListViewInventoryAdapter adapter;
     OnEventListener onSomeEventListener;
     FloatingActionButton floatingActionButton;
+    long idTemp;
 
     public static InventoryFragment newInstance() {
 
@@ -94,6 +101,42 @@ public class InventoryFragment extends Fragment {
             }
         });
         floatingActionButton.attachToListView(listView);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+            @Override
+            public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long id, boolean checked) {
+                idTemp = id;
+            }
+
+            @Override
+            public boolean onCreateActionMode(android.view.ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_delete_item, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(android.view.ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(android.view.ActionMode mode, MenuItem item) {
+                if(item.getItemId() == R.id.delete_item){
+                    SqlQuery.deleteInventories(getContext(),idTemp);
+                    Toast.makeText(getContext(),"Успішно видалено!!!",Toast.LENGTH_SHORT).show();
+                    adapter.notifyDataSetChanged();
+                    onResume();
+                }
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(android.view.ActionMode mode) {
+
+            }
+        });
     }
 
     @Override
@@ -102,5 +145,15 @@ public class InventoryFragment extends Fragment {
         adapter = new ListViewInventoryAdapter(getContext(), SqlQuery.getInventoriesCursor(getContext()),true);
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+    }
+
+    public Cursor setDataFromDBAdapter(){
+        Cursor cursor;
+
+        if(Preferences.loadBooleanSetting("isHideInvoice",getContext()) == false)
+            cursor = SqlQuery.getInventoriesCursor(getContext());
+        else
+            cursor = SqlQuery.getInventoriesCursorWithoutComplete(getContext());
+        return cursor;
     }
 }

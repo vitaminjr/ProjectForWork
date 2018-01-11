@@ -1,11 +1,15 @@
 package com.example.vitaminjr.mobileacounting.activities;
 
-import android.app.Activity;
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +23,6 @@ import com.example.vitaminjr.mobileacounting.ExportFile;
 import com.example.vitaminjr.mobileacounting.ImportFile;
 import com.example.vitaminjr.mobileacounting.R;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
-import com.example.vitaminjr.mobileacounting.fragments.DatePickerDialogFragment;
 import com.example.vitaminjr.mobileacounting.interfaces.ReturnEventListener;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
     TextView editExpenseInvoice;
     TextView editInventory;
     TextView editPriceCheck;
+    TextView editMoveInvoice;
     TextView createInventory;
     TextView createPriceCheck;
     ImageView exportInvoice;
@@ -61,14 +65,18 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
     FloatingActionsMenu actionsMenu;
     String codeRegister;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
         initGui();
+        if(Build.VERSION.SDK_INT == 23)
+            requestMultiplePermissions();
+
     }
+
+
 
     public void initGui(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -78,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
         editProfitInvoice = (TextView) findViewById(R.id.edit_profit_invoice);
         editExpenseInvoice = (TextView) findViewById(R.id.edit_expense_invoice);
         editPriceCheck = (TextView) findViewById(R.id.edit_price_check);
+        editMoveInvoice = (TextView) findViewById(R.id.edit_move_invoice);
         editInventory = (TextView) findViewById(R.id.review_inventory);
         actionDownloadDB = (FloatingActionButton) findViewById(R.id.button_download);
         actionSettings = (FloatingActionButton) findViewById(R.id.button_settings);
@@ -88,6 +97,16 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
         createPriceCheck = (TextView) findViewById(R.id.create_price_check);
         actionsMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
         initEditClickListeners();
+
+    }
+
+    public void requestMultiplePermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[] {
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+
+                },
+                200);
     }
 
     public void initEditClickListeners(){
@@ -99,6 +118,15 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
                 startActivity(gainIntent);
                 toggleActionMenu();
 
+            }
+        });
+
+        editMoveInvoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent gainIntent = new Intent(getApplicationContext(), MoveInvoiceActivity.class);
+                startActivity(gainIntent);
+                toggleActionMenu();
 
             }
         });
@@ -132,13 +160,7 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
         actionDownloadDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
-                if (wifi.isWifiEnabled()) {
-                    ImportFile importFile = new ImportFile(context, urlAddressDownloadFile, urlInputFile);
-                    importFile.execute();
-                    toggleActionMenu();
-                }else
-                    Toast.makeText(getApplicationContext(),"Перевірте підключення до Wifi мережі",Toast.LENGTH_SHORT).show();
+                onCreateDialog();
             }
         });
         createInventory.setOnClickListener(new View.OnClickListener() {
@@ -175,8 +197,9 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
                 try {
                     SqlQuery.exportInvoices(getApplicationContext());
                     SqlQuery.exportInvoicesRows(getApplicationContext());
-                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
                     SqlQuery.exportInvoiceProviders(getApplicationContext());
+                    SqlQuery.exportInvoicesRowTovars(getApplicationContext());
+                    SqlQuery.exportStoresByInvoice(getApplicationContext());
 
                     WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
                     if (wifi.isWifiEnabled()){
@@ -310,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
         urlOutputFile = preferences.getString("address_output","");
         urlOutputFile = preferences.getString("address_output","");
         codeRegister = preferences.getString(RegistrationActivity.CODE_REGISTER,"");
-
         if(preferences.getAll().size() == 0){
             loadDefaultSettings();
         }
@@ -328,6 +350,8 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
 
     }
 
+
+
     public void toggleActionMenu(){
         if (actionsMenu.isExpanded() == true)
             actionsMenu.toggle();
@@ -344,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
                 startActivityForResult(intent, 1);
             }
         }
+        startNewDB();
     }
 
     @Override
@@ -362,4 +387,43 @@ public class MainActivity extends AppCompatActivity implements ReturnEventListen
             }
         }
     }
+
+    public void onCreateDialog(){
+        final String title = "Попередження";
+        String message = "Ви дійсно хочете оновити базу? \n" +
+                "Всі збережені дані будуть втрачені";
+        String button1String = "Ні";
+        String button2String = "Так";
+
+        final AlertDialog.Builder ad = new AlertDialog.Builder(context);
+        ad.setTitle(title);
+        ad.setMessage(message);
+
+        ad.setNegativeButton(button1String,new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+
+            }
+        });
+        ad.setPositiveButton(button2String, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                downloadDB();
+            }
+        });
+        ad.setCancelable(true);
+        ad.show();
+    }
+
+    public void downloadDB(){
+        WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        if (wifi.isWifiEnabled()) {
+            ImportFile importFile = new ImportFile(context, urlAddressDownloadFile, urlInputFile);
+            importFile.execute();
+            toggleActionMenu();
+        }else
+            Toast.makeText(getApplicationContext(),"Перевірте підключення до Wifi мережі",Toast.LENGTH_SHORT).show();
+    }
+    public void startNewDB(){
+        SqlQuery.newDBHelper(this).getWritableDatabase();
+    }
+
 }

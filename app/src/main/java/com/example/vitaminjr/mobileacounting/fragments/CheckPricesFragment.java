@@ -77,6 +77,5 @@ public class CheckPricesFragment extends Fragment {
         getActivity().findViewById(R.id.layout_header).setVisibility(View.VISIBLE);
         adapter.setCursor(SqlQuery.getPriceCheckItems(getContext()));
         adapter.notifyDataSetChanged();
-
     }
 }

@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.vitaminjr.mobileacounting.R;
@@ -19,6 +20,8 @@ import com.example.vitaminjr.mobileacounting.adapters.InvertoryPagerAdapter;
 import com.example.vitaminjr.mobileacounting.databases.SqlQuery;
 import com.example.vitaminjr.mobileacounting.fragments.GainInvoiceEditFragment;
 import com.example.vitaminjr.mobileacounting.fragments.InventoryEditFragment;
+import com.example.vitaminjr.mobileacounting.helpers.CorrectionType;
+import com.example.vitaminjr.mobileacounting.helpers.CreateType;
 import com.example.vitaminjr.mobileacounting.interfaces.OnBackPressedListener;
 import com.example.vitaminjr.mobileacounting.models.InventoryInvoice;
 import com.example.vitaminjr.mobileacounting.models.Invoice;
@@ -47,6 +50,7 @@ public class InventoryEditActivity extends AppCompatActivity {
     InvertoryPagerAdapter pagerAdapter;
     List<InventoryInvoice> inventoryInvoiceList;
     Intent editArticlesIntent;
+    ImageView buttonEdit;
 
 
     long inventoryId;
@@ -65,7 +69,9 @@ public class InventoryEditActivity extends AppCompatActivity {
     public void initGui(){
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_inventory_edit);
+        buttonEdit  = (ImageView) findViewById(R.id.button_edit);
         setSupportActionBar(toolbar);
+        clickEditButton();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -109,33 +115,31 @@ public class InventoryEditActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
 
-                        if(inventoryInvoiceList!=null) {
-                            numberInventory = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getNumber();
-                            inventoryId = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getInventoryId();
-                            created = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getCreated();
-                        }
-                        else
-                        {
-                            InventoryInvoice invoice = SqlQuery.getInventoriesInvoice(SqlQuery.getInventoriesByIdCursor(getApplicationContext(), InventoryEditFragment.inventoryIdForActivity));
-                            numberInventory = invoice.getNumber();
-                            inventoryId = invoice.getInventoryId();
-                            created = invoice.getCreated();
-                        }
+                        getInventoryInvoice();
 
-                        if (inventoryId != 0) {
                             switch (drawerItem.getIdentifier()) {
                                 case EDIT:
-
-                                    initIntent(InventoryEditArticlesActivity.class);
-
+                                    if (inventoryId == 0) {
+                                        if(inventoryEditFragment.saveInvoice() == true) {
+                                            getInventoryInvoice();
+                                            initIntent(InventoryEditArticlesActivity.class);
+                                        }
+                                    }
+                                    else
+                                        initIntent(InventoryEditArticlesActivity.class);
                                     break;
                                 case REVISION:
-                                    initIntent(ListArticlesInventoryActivity.class);
+                                    if (inventoryId == 0) {
+                                        if(inventoryEditFragment.saveInvoice() == true) {
+                                            getInventoryInvoice();
+                                            initIntent(ListArticlesInventoryActivity.class);
+                                        }
+                                    }
+                                    else
+                                        initIntent(ListArticlesInventoryActivity.class);
                                     break;
                             }
-                        }
-                        else
-                            Toast.makeText(getApplicationContext(),"Збережіть накладну!!!",Toast.LENGTH_SHORT).show();
+
                     }
 
                 }).build();
@@ -194,7 +198,8 @@ public class InventoryEditActivity extends AppCompatActivity {
         }
 
         else {
-            findViewById(R.id.button_layout).setVisibility(View.GONE);
+                findViewById(R.id.button_prev_fragment).setVisibility(View.GONE);
+                findViewById(R.id.button_next_fragment).setVisibility(View.GONE);
         }
     }
     public void initIntent(Class typeClass){
@@ -203,5 +208,39 @@ public class InventoryEditActivity extends AppCompatActivity {
         editArticlesIntent.putExtra(ID_INVENTORY,inventoryId);
         editArticlesIntent.putExtra(CREATED,created);
         startActivity(editArticlesIntent);
+    }
+
+    public void clickEditButton(){
+
+        buttonEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getInventoryInvoice();
+                if (inventoryId == 0) {
+                    if(inventoryEditFragment.saveInvoice() == true) {
+                        getInventoryInvoice();
+                        initIntent(InventoryEditArticlesActivity.class);
+                    }
+                }
+                else
+                    initIntent(InventoryEditArticlesActivity.class);
+            }
+
+        });
+    }
+
+    public void getInventoryInvoice(){
+        if(inventoryInvoiceList!=null) {
+            numberInventory = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getNumber();
+            inventoryId = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getInventoryId();
+            created = inventoryInvoiceList.get(inventoryInvoicePager.getCurrentItem()).getCreated();
+        }
+        else
+        {
+            InventoryInvoice invoice = SqlQuery.getInventoriesInvoice(SqlQuery.getInventoriesByIdCursor(getApplicationContext(), InventoryEditFragment.inventoryIdForActivity));
+            numberInventory = invoice.getNumber();
+            inventoryId = invoice.getInventoryId();
+            created = invoice.getCreated();
+        }
     }
 }

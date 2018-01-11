@@ -5,5 +5,6 @@ package com.example.vitaminjr.mobileacounting.helpers;
  */
 public enum InvoiceType {
     profit,
-    expense
+    expense,
+    move
 }

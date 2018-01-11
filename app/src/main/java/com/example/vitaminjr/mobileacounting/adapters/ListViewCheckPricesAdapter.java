@@ -52,10 +52,10 @@ public class ListViewCheckPricesAdapter extends CursorAdapter {
 
         int invoiceRowId = cursor.getColumnIndex("_id");
 
-        viewHolder.nameTextView.setText(cursor.getString(cursor.getColumnIndex("a.name")));
-        viewHolder.codeTextView.setText(cursor.getString(cursor.getColumnIndex("ab.barcode")));
-        viewHolder.priceTextView.setText(String.format("%.3f",cursor.getFloat(cursor.getColumnIndex("a.price"))));
-        viewHolder.unitTextView.setText(cursor.getString(cursor.getColumnIndex("a.unit_name")));
+        viewHolder.nameTextView.setText(cursor.getString(cursor.getColumnIndex("name")));
+        viewHolder.codeTextView.setText(cursor.getString(cursor.getColumnIndex("barcode")));
+        viewHolder.priceTextView.setText(String.format("%.2f",cursor.getFloat(cursor.getColumnIndex("price_out"))));
+        viewHolder.unitTextView.setText(cursor.getString(cursor.getColumnIndex("unit_name")));
 
     }
 
